@@ -1,12 +1,4 @@
-/*
-*
-    creating and updating users
-    creating and updating a users favourite subredits
-    setting the newsletter send out time for each user (default: 8am)
-    Turning on and off the newsletter send out for a specific user
-    triggering the send of a newsletter to each respective users email at
-    each users specified send out time (more on this in the section: "Our part")
-* */
+import { reddit, RedditTopInterval } from "../reddit/reddit";
 
 describe("reddit-notifier", () => {
   it("can create a user", () => {
@@ -49,7 +41,9 @@ describe("reddit-notifier", () => {
     expect(true).toBe(false);
   });
 
-  it("can get last 3 most-voted posts from a subreddit", () => {
-    expect(true).toBe(false);
+  fit("can get last 3 most-voted posts from a subreddit", async () => {
+    const posts = await reddit.getTop("funny", 3, RedditTopInterval.AllTime);
+    expect(posts.length).toEqual(3);
+    expect(posts[0].title).toContain("My cab driver tonight was so excited");
   });
 });
