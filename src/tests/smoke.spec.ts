@@ -11,7 +11,7 @@ describe("reddit-notifier", () => {
 
   fit("can create a user", async () => {
     await usersService.getOrCreate("malcoriel@gmail.com");
-    const users = usersService.getAll();
+    const users = await usersService.getAll();
     expect(users).toContainEqual(
       expect.objectContaining({ email: "malcoriel@gmail.com" })
     );

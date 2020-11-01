@@ -20,7 +20,7 @@ const usersService = {
     byEmail = _.keyBy(Object.values(storage), "email");
   },
 
-  create: function (email: string): User {
+  async create(email: string): Promise<User> {
     const id = uuid();
     const newUser = {
       email,
@@ -30,22 +30,22 @@ const usersService = {
     usersService.reindex();
     return newUser;
   },
-  getOrCreate(email: string): User {
-    let user = usersService.findByEmail(email);
+  async getOrCreate(email: string): Promise<User> {
+    let user = await usersService.findByEmail(email);
     if (!user) {
-      user = this.create(email);
+      user = await this.create(email);
     }
     return user;
   },
 
-  findByEmail(email: string): User | undefined {
+  async findByEmail(email: string): Promise<User | undefined> {
     return byEmail[email];
   },
 
-  getAll() {
+  async getAll() {
     return Object.values(storage);
   },
-  updateEmailById(id: string, newEmail: string): User {
+  async updateEmailById(id: string, newEmail: string): Promise<User> {
     const existing = storage[id];
     if (!existing) {
       throw new NonExistentEntityError(`User by id ${id} does not exist`);
