@@ -1,16 +1,17 @@
-import { reddit, RedditTopInterval } from "../reddit/reddit";
+import { redditService, RedditTopInterval } from "../reddit/redditService";
+import { usersService } from "../users/usersService";
 
 describe("reddit-notifier", () => {
-  it("can create a user", () => {
-    expect(true).toBe(false);
-  });
-
   it("can update a user", () => {
     expect(true).toBe(false);
   });
 
-  it("extra: can list users", () => {
-    expect(true).toBe(false);
+  fit("can create a user", async () => {
+    await usersService.create("malcoriel@gmail.com");
+    const users = usersService.getAll();
+    expect(users).toContain(
+      expect.objectContaining({ email: "malcoriel@gmail.com" })
+    );
   });
 
   it("extra: can delete a user", () => {
@@ -37,15 +38,21 @@ describe("reddit-notifier", () => {
     expect(true).toBe(false);
   });
 
-  fit("can validate a subreddit exists", async () => {
-    const exists = await reddit.validateSubredditExists("funny");
+  it("can validate a subreddit exists", async () => {
+    const exists = await redditService.validateSubredditExists("funny");
     expect(exists).toBe(true);
-    const doesNotExist = await reddit.validateSubredditExists("funnyqweqweqwe");
+    const doesNotExist = await redditService.validateSubredditExists(
+      "funnyqweqweqwe"
+    );
     expect(doesNotExist).toBe(false);
   });
 
   it("can get last 3 most-voted posts from a subreddit", async () => {
-    const posts = await reddit.getTop("funny", 3, RedditTopInterval.AllTime);
+    const posts = await redditService.getTop(
+      "funny",
+      3,
+      RedditTopInterval.AllTime
+    );
     expect(posts.length).toBe(3);
     expect(posts[0].title).toContain("My cab driver tonight was so excited");
   });

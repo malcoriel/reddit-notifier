@@ -30,7 +30,7 @@ const intervalToType = new Map<RedditTopInterval, string>([
   [RedditTopInterval.Last24Hours, "day"],
 ]);
 
-const reddit = {
+const redditService = {
   /**
    * Get top posts from a subreddit.
    * @caveats reddit API does not support its 'limit' param properly for this endpoint, so count can only be 0-25
@@ -71,4 +71,4 @@ const reddit = {
   },
 };
 
-export { reddit, RedditTopInterval };
+export { redditService, RedditTopInterval };
