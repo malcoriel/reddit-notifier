@@ -8,6 +8,6 @@ declare module "reddit" {
       userAgent: string,
     });
 
-    get(url: string, data: any): any;
+    get(url: string, data?: any): any;
   }
 }
