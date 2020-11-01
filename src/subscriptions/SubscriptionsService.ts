@@ -126,8 +126,10 @@ class SubscriptionsService {
     const user = await this.usersService.getById(userId);
     const newPosts = await this.getNewPostsForUser(userId);
     await this.mailerService.send({
-      subject: "New posts for you",
-      recipient: user.email,
+      subject: "Reddit Newsletter",
+      title: "Reddit Newsletter",
+      userName: "TODO",
+      recipient: `TODO <user.email>`,
       newPosts,
     });
   }

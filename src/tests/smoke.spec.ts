@@ -111,15 +111,54 @@ describe("reddit-notifier", () => {
     };
     const usersService = getUsersService();
     const service = getSubscriptionsService(mockMailer, usersService);
-    const user1 = await usersService.getOrCreate("malcoriel+1@gmail.com");
+    const user1 = await usersService.getOrCreate("malcoriel@gmail.com");
     const subscription1 = await service.getOrCreate(user1.id);
     await service.addSubreddit(subscription1.id, "funny");
     await service.addSubreddit(subscription1.id, "worldnews");
     await service.triggerEmailForUser(user1.id);
     expect(mockMailer.send).toBeCalledWith({
-      subject: "New posts for you",
-      recipient: "malcoriel+1@gmail.com",
-      newPosts: {},
+      subject: "Reddit Newsletter",
+      title: "Reddit Newsletter",
+      userName: "Valeriy",
+      recipient: "malcoriel@gmail.com",
+      newPosts: [
+        {
+          name: "funny",
+          link: "https://reddit.com/r/funny/top",
+          posts: [
+            {
+              title: "wow",
+              upvotes: "45k",
+              imageUrl: "https://imgur.com/example.jpg",
+              url: "https://reddit.com/r/funny/wow",
+            },
+            {
+              title: "wow",
+              upvotes: "45k",
+              imageUrl: "https://imgur.com/example.jpg",
+              url: "https://reddit.com/r/funny/wow",
+            },
+          ],
+        },
+        {
+          name: "World News",
+          link: "https://reddit.com/r/worldnews/top",
+          posts: [
+            {
+              title: "wow",
+              upvotes: "45k",
+              imageUrl: "https://imgur.com/example.jpg",
+              url: "https://reddit.com/r/funny/wow",
+            },
+            {
+              title: "wow",
+              upvotes: "45k",
+              imageUrl: "https://imgur.com/example.jpg",
+              url: "https://reddit.com/r/funny/wow",
+            },
+          ],
+        },
+      ],
     });
   });
 
