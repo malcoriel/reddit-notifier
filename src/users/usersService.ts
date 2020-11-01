@@ -1,19 +1,13 @@
 import { v4 as uuid } from "uuid";
 import _, { Dictionary } from "lodash";
+import { NonExistentEntityError } from "../errors/NonExistentEntityError";
+
 type User = {
   email: string;
   id: string;
 };
 const storage: Record<string, User> = {};
 let byEmail: Dictionary<User> = {};
-
-class NonExistentEntityError implements Error {
-  constructor(public message: string) {
-    this.message = message;
-  }
-
-  name = "NON_EXISTENT_ENTITY";
-}
 
 const usersService = {
   reindex() {

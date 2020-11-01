@@ -1,15 +1,16 @@
 import { redditService, RedditTopInterval } from "../reddit/redditService";
 import { usersService } from "../users/usersService";
+import { subscriptionsService } from "../subscriptions/subscriptionsService";
 
 describe("reddit-notifier", () => {
-  fit("can update a user", async () => {
+  it("can update a user", async () => {
     const user = await usersService.getOrCreate("malcoriel@gmail.com");
     await usersService.updateEmailById(user.id, "malcoriel+test@gmail.com");
     const updated = await usersService.findByEmail("malcoriel+test@gmail.com");
     expect(updated).not.toBeUndefined();
   });
 
-  fit("can create a user", async () => {
+  it("can create a user", async () => {
     await usersService.getOrCreate("malcoriel@gmail.com");
     const users = await usersService.getAll();
     expect(users).toContainEqual(
@@ -17,7 +18,7 @@ describe("reddit-notifier", () => {
     );
   });
 
-  fit("extra: can delete a user", async () => {
+  it("extra: can delete a user", async () => {
     await usersService.getOrCreate("malcoriel@gmail.com");
     const users = await usersService.getAll();
     expect(users).toContainEqual(
@@ -30,8 +31,17 @@ describe("reddit-notifier", () => {
     );
   });
 
-  it("can create/set a list of favorite subreddits for a user", () => {
-    expect(true).toBe(false);
+  fit("can create/update a list of favorite subreddits for a user", async () => {
+    const user = await usersService.getOrCreate("malcoriel@gmail.com");
+    const subscription = await subscriptionsService.getOrCreate(user.id);
+    await subscriptionsService.addSubreddit(subscription.id, "funny");
+    const updatedSub = await subscriptionsService.findByUserId(user.id);
+    expect(updatedSub).toEqual(
+      expect.objectContaining({
+        subreddits: ["funny"],
+        userId: user.id,
+      })
+    );
   });
 
   it("can set the email send time", () => {
