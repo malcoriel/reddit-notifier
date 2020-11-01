@@ -12,20 +12,30 @@ class UsersService implements IUsersService {
     this.byEmail = _.keyBy(Object.values(this.storage), "email");
   }
 
-  async create(email: string): Promise<User> {
+  async create(
+    email: string,
+    firstName?: string,
+    lastName?: string
+  ): Promise<User> {
     const id = uuid();
     const newUser = {
       email,
       id,
+      firstName,
+      lastName,
     };
     this.storage[id] = newUser;
     this.reindex();
     return newUser;
   }
-  async getOrCreate(email: string): Promise<User> {
+  async getOrCreate(
+    email: string,
+    firstName?: string,
+    lastName?: string
+  ): Promise<User> {
     let user = await this.findByEmail(email);
     if (!user) {
-      user = await this.create(email);
+      user = await this.create(email, firstName, lastName);
     }
     return user;
   }

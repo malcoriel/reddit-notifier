@@ -125,11 +125,18 @@ class SubscriptionsService {
     }
     const user = await this.usersService.getById(userId);
     const newPosts = await this.getNewPostsForUser(userId);
+    let firstName = user.firstName || "fellow redditor";
+    let lastNameSuffix = user.lastName ? " " + user.lastName : "";
+    let fullName = user.firstName
+      ? `${user.firstName}${lastNameSuffix}`
+      : undefined;
+    let recipient = fullName ? `${fullName} <${user.email}>` : user.email;
+
     await this.mailerService.send({
       subject: "Reddit Newsletter",
       title: "Reddit Newsletter",
-      userName: "TODO",
-      recipient: `TODO <user.email>`,
+      userName: firstName,
+      recipient: recipient,
       newPosts,
     });
   }
