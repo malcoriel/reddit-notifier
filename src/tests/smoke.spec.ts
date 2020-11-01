@@ -129,7 +129,7 @@ describe("reddit-notifier", () => {
     });
   });
 
-  fit("can format new posts correctly", async () => {
+  it("can format new posts correctly", async () => {
     const usersService = getUsersService();
     const service = getSubscriptionsService();
     const user1 = await usersService.getOrCreate("malcoriel@gmail.com");
@@ -204,20 +204,5 @@ describe("reddit-notifier", () => {
     const posts = await service.getTop("funny", 3, RedditTopInterval.AllTime);
     expect(posts.length).toBe(3);
     expect(posts[0].title).toContain("My cab driver tonight was so excited");
-  });
-
-  it("can get all the information from reddit to format a newsletter", async () => {
-    const service = getRedditService();
-    const posts = await service.getRawTopPosts(
-      RedditTopInterval.Last24Hours,
-      "funny",
-      3
-    );
-    // console.log(posts);
-    for (const post of posts) {
-      expect(typeof post.permalink).toEqual("string");
-      // expect(typeof post.thumbnail).toEqual("string");
-      expect(typeof post.ups).toEqual("number");
-    }
   });
 });

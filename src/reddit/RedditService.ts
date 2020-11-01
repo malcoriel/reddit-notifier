@@ -73,7 +73,9 @@ class RedditService implements IRedditService {
     const data = _.get(res, "data", {});
     return {
       name: data.title || "Unknown subreddit",
-      link: `https://reddit.com${data.url}top`,
+      link: data.url
+        ? `https://reddit.com${data.url}top`
+        : "https://reddit.com",
     };
   }
 
