@@ -3,7 +3,6 @@ import { UsersService } from "../users/UsersService";
 import { SubscriptionsService } from "../subscriptions/SubscriptionsService";
 import { RedditTopInterval } from "../reddit/RedditTopInterval";
 import { config } from "../typedConfig/typedConfig";
-import { DateTime } from "luxon";
 
 describe("reddit-notifier", () => {
   const getRedditService = () =>
@@ -74,22 +73,16 @@ describe("reddit-notifier", () => {
     const usersService = getUsersService();
     const user = await usersService.getOrCreate("malcoriel@gmail.com");
     const subscription = await service.getOrCreate(user.id);
-    await service.setNotificationTime(
-      subscription.id,
-      "2020-11-01T19:00:09+01:00"
-    );
+    await service.setNotificationTime(subscription.id, "19:21:09+01:00");
     const updatedSub = await service.findById(subscription.id);
-    expect(updatedSub.notificationTime?.toISO()).toEqual(
-      "2020-11-01T18:00:09.000Z"
-    );
+    expect(updatedSub.notificationMinuteOffsetUTC).toEqual(1101);
   });
 
-  xit("can turn on the email for a user", () => {
-    expect(true).toBe(false);
-  });
-
-  xit("can turn off the email for a user", () => {
-    expect(true).toBe(false);
+  xit("can turn on/off the email for a user", async () => {
+    const service = getSubscriptionsService();
+    const usersService = getUsersService();
+    const user = await usersService.getOrCreate("malcoriel@gmail.com");
+    const subscription = await service.getOrCreate(user.id);
   });
 
   xit("can trigger a news email at the specified time", () => {

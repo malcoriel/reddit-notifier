@@ -63,8 +63,9 @@ class SubscriptionsService {
     if (!parsed.isValid) {
       throw new BadArgumentError(`Time string ${isoTime} is not in ISO format`);
     }
+    const time = parsed.hour * 60 + parsed.minute;
     const existing = await this.getById(subId);
-    existing.notificationTime = parsed;
+    existing.notificationMinuteOffsetUTC = time;
     this.storage[existing.id] = existing;
     this.reindex();
     return existing;
