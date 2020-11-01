@@ -2,8 +2,9 @@ import { v4 as uuid } from "uuid";
 import _, { Dictionary } from "lodash";
 import { NonExistentEntityError } from "../errors/NonExistentEntityError";
 import { User } from "./User";
+import { IUsersService } from "./IUsersService";
 
-class UsersService {
+class UsersService implements IUsersService {
   private storage: Record<string, User> = {};
   private byEmail: Dictionary<User> = {};
 
@@ -36,15 +37,14 @@ class UsersService {
   async getAll() {
     return Object.values(this.storage);
   }
+
   async updateEmailById(id: string, newEmail: string): Promise<User> {
-    const existing = this.storage[id];
-    if (!existing) {
-      throw new NonExistentEntityError(`User by id ${id} does not exist`);
-    }
+    const existing = this.getById(id);
     existing.email = newEmail;
     this.reindex();
     return existing;
   }
+
   async deleteByEmail(email: string): Promise<User | undefined> {
     const existing = this.byEmail[email];
     if (!existing) {
@@ -52,6 +52,14 @@ class UsersService {
     }
     delete this.storage[existing.id];
     this.reindex();
+    return existing;
+  }
+
+  getById(id: string): User {
+    let existing = this.storage[id];
+    if (!existing) {
+      throw new NonExistentEntityError(`User by id ${id} does not exist`);
+    }
     return existing;
   }
 }

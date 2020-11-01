@@ -3,12 +3,24 @@ import { UsersService } from "../users/UsersService";
 import { SubscriptionsService } from "../subscriptions/SubscriptionsService";
 import { RedditTopInterval } from "../reddit/RedditTopInterval";
 import { config } from "../typedConfig/typedConfig";
+import { IMailerService, MailerService } from "../mails/MailerService";
+import { IUsersService } from "../users/IUsersService";
 
 describe("reddit-notifier", () => {
   const getRedditService = () =>
     new RedditService(config.getTyped("root").redditApp);
-  const getSubscriptionsService = () => {
-    return new SubscriptionsService(getRedditService());
+
+  const getMailerService = () => new MailerService();
+
+  const getSubscriptionsService = (
+    mailer?: IMailerService,
+    users?: IUsersService
+  ) => {
+    return new SubscriptionsService(
+      getRedditService(),
+      mailer || getMailerService(),
+      users || getUsersService()
+    );
   };
   const getUsersService = () => new UsersService();
 
@@ -68,7 +80,7 @@ describe("reddit-notifier", () => {
     ).rejects.toMatchObject({ message: /does not exist/ });
   });
 
-  fit("can set the email send time", async () => {
+  it("can set the email send time", async () => {
     const service = getSubscriptionsService();
     const usersService = getUsersService();
     const user = await usersService.getOrCreate("malcoriel@gmail.com");
@@ -79,7 +91,7 @@ describe("reddit-notifier", () => {
     expect(updatedSub.notificationMinuteOffsetUTC).toEqual(1101);
   });
 
-  fit("can turn on/off the email for a user", async () => {
+  it("can turn on/off the email for a user", async () => {
     const service = getSubscriptionsService();
     const usersService = getUsersService();
     const user = await usersService.getOrCreate("malcoriel@gmail.com");
@@ -93,8 +105,22 @@ describe("reddit-notifier", () => {
     expect(updatedSub.enabled).toEqual(true);
   });
 
-  xit("can trigger a news email at the specified time", () => {
-    expect(true).toBe(false);
+  fit("can trigger a news email", async () => {
+    const mockMailer = {
+      send: jest.fn(),
+    };
+    const usersService = getUsersService();
+    const service = getSubscriptionsService(mockMailer, usersService);
+    const user1 = await usersService.getOrCreate("malcoriel+1@gmail.com");
+    const subscription1 = await service.getOrCreate(user1.id);
+    await service.addSubreddit(subscription1.id, "funny");
+    await service.addSubreddit(subscription1.id, "worldnews");
+    await service.triggerEmailForUser(user1.id);
+    expect(mockMailer.send).toBeCalledWith({
+      subject: "New posts for you",
+      recipient: "malcoriel+1@gmail.com",
+      newPosts: {},
+    });
   });
 
   it("can validate a subreddit exists", async () => {
