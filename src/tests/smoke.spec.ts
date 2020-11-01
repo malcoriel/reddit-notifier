@@ -3,16 +3,17 @@ import { UsersService } from "../users/UsersService";
 import { SubscriptionsService } from "../subscriptions/SubscriptionsService";
 import { RedditTopInterval } from "../reddit/RedditTopInterval";
 import { config } from "../typedConfig/typedConfig";
-import { IRedditAppConfig } from "../typedConfig/IAppConfig";
 
 describe("reddit-notifier", () => {
-  let redditAppConfig: IRedditAppConfig;
-  beforeAll(() => {
-    redditAppConfig = config.getTyped("root").redditApp;
-  });
+  const getRedditService = () =>
+    new RedditService(config.getTyped("root").redditApp);
+  const getSubscriptionsService = () => {
+    return new SubscriptionsService(getRedditService());
+  };
+  const getUsersService = () => new UsersService();
 
   it("can update a user", async () => {
-    const service = new UsersService();
+    const service = getUsersService();
     const user = await service.getOrCreate("malcoriel@gmail.com");
     await service.updateEmailById(user.id, "malcoriel+test@gmail.com");
     const updated = await service.findByEmail("malcoriel+test@gmail.com");
@@ -20,7 +21,7 @@ describe("reddit-notifier", () => {
   });
 
   it("can create a user", async () => {
-    const service = new UsersService();
+    const service = getUsersService();
     await service.getOrCreate("malcoriel@gmail.com");
     const users = await service.getAll();
     expect(users).toContainEqual(
@@ -29,7 +30,7 @@ describe("reddit-notifier", () => {
   });
 
   it("extra: can delete a user", async () => {
-    const service = new UsersService();
+    const service = getUsersService();
     await service.getOrCreate("malcoriel@gmail.com");
     const users = await service.getAll();
     expect(users).toContainEqual(
@@ -43,10 +44,8 @@ describe("reddit-notifier", () => {
   });
 
   it("can create/update a list of favorite subreddits for a user", async () => {
-    const service = new SubscriptionsService(
-      new RedditService(redditAppConfig)
-    );
-    const usersService = new UsersService();
+    const service = getSubscriptionsService();
+    const usersService = getUsersService();
     const user = await usersService.getOrCreate("malcoriel@gmail.com");
     const subscription = await service.getOrCreate(user.id);
     await service.addSubreddit(subscription.id, "funny");
@@ -60,10 +59,8 @@ describe("reddit-notifier", () => {
   });
 
   it("refuses to add a non-existent subreddit", async () => {
-    const service = new SubscriptionsService(
-      new RedditService(redditAppConfig)
-    );
-    const usersService = new UsersService();
+    const service = getSubscriptionsService();
+    const usersService = getUsersService();
     const user = await usersService.getOrCreate("malcoriel@gmail.com");
     const subscription = await service.getOrCreate(user.id);
     await expect(
@@ -71,9 +68,7 @@ describe("reddit-notifier", () => {
     ).rejects.toMatchObject({ message: /does not exist/ });
   });
 
-  xit("can set the email send time", () => {
-    expect(true).toBe(false);
-  });
+  it("can set the email send time", () => {});
 
   xit("can turn on the email for a user", () => {
     expect(true).toBe(false);
@@ -88,7 +83,7 @@ describe("reddit-notifier", () => {
   });
 
   it("can validate a subreddit exists", async () => {
-    const service = new RedditService(redditAppConfig);
+    const service = getRedditService();
     const exists = await service.validateSubredditExists("funny");
     expect(exists).toBe(true);
     const doesNotExist = await service.validateSubredditExists(
@@ -98,7 +93,7 @@ describe("reddit-notifier", () => {
   });
 
   it("can get last 3 most-voted posts from a subreddit", async () => {
-    const service = new RedditService(redditAppConfig);
+    const service = getRedditService();
     const posts = await service.getTop("funny", 3, RedditTopInterval.AllTime);
     expect(posts.length).toBe(3);
     expect(posts[0].title).toContain("My cab driver tonight was so excited");
