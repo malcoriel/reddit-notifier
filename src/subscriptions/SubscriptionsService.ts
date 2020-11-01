@@ -7,6 +7,8 @@ import { DateTime } from "luxon";
 import { BadArgumentError } from "../errors/BadArgumentError";
 import { IMailerService } from "../mails/MailerService";
 import { IUsersService } from "../users/IUsersService";
+import pMap from "p-map";
+import { RedditTopInterval } from "../reddit/RedditTopInterval";
 
 class SubscriptionsService {
   private storage: Record<string, Subscription> = {};
@@ -124,7 +126,7 @@ class SubscriptionsService {
       return;
     }
     const user = await this.usersService.getById(userId);
-    const newPosts = await this.getNewPostsForUser(userId);
+    const newPosts = await this.getNewPostsForSubscription(sub);
     let firstName = user.firstName || "fellow redditor";
     let lastNameSuffix = user.lastName ? " " + user.lastName : "";
     let fullName = user.firstName
@@ -141,8 +143,26 @@ class SubscriptionsService {
     });
   }
 
-  private async getNewPostsForUser(userId: string) {
-    return {};
+  async getNewPostsForSubscription(sub: Subscription) {
+    return pMap(
+      sub.subreddits,
+      async (subreddit) => {
+        const posts = await this.redditService.getTop(
+          subreddit,
+          3,
+          RedditTopInterval.Last24Hours
+        );
+        const { name, link } = await this.redditService.getSubredditInfo(
+          subreddit
+        );
+        return {
+          name,
+          link,
+          posts,
+        };
+      },
+      { concurrency: 4 }
+    );
   }
 }
 

@@ -2,7 +2,7 @@ import RedditClient from "reddit";
 import _ from "lodash";
 import { RedditPost } from "./RedditPost";
 import { RedditTopInterval } from "./RedditTopInterval";
-import { IRedditService } from "./IRedditService";
+import { IRedditService, SubredditInfo } from "./IRedditService";
 import { IRedditAppConfig } from "../typedConfig/IAppConfig";
 
 // Available: hour, day, week, month, year, all
@@ -32,19 +32,27 @@ class RedditService implements IRedditService {
     count: number,
     interval: RedditTopInterval
   ): Promise<RedditPost[]> {
+    let posts = await this.getRawTopPosts(interval, subreddit, count);
+    posts = posts.slice(0, count);
+    return posts as RedditPost[];
+  }
+
+  // could've been 'internal' if such thing existed in TS
+  async getRawTopPosts(
+    interval: RedditTopInterval,
+    subreddit: string,
+    count: number
+  ): Promise<any[]> {
     const redditType = intervalToType.get(interval);
     // reddit ignores limit param for some reason, but omitting it causes incorrect sorting of posts
     let url = `/r/${subreddit}/top/?t=${redditType}&limit=${count}`;
     const res = await this.client.get(url);
 
-    let posts = _.get(res, "data.children", []).map((raw: any) =>
-      _.get(raw, "data", {})
-    ) as RedditPost[];
-
-    posts = posts.slice(0, count);
-
-    return posts;
+    return _.get(res, "data.children", []).map((raw: any) =>
+      this.mapRawPost(_.get(raw, "data", {}))
+    );
   }
+
   async validateSubredditExists(subreddit: string): Promise<boolean> {
     try {
       await this.client.get(
@@ -58,6 +66,23 @@ class RedditService implements IRedditService {
       }
       throw e;
     }
+  }
+
+  getSubredditInfo(subreddit: string): SubredditInfo {
+    return { name: "foo", link: "bar" };
+  }
+
+  private mapRawPost(raw: any): RedditPost {
+    return {
+      url: `https://reddit.com${raw.permalink}`,
+      imageUrl: raw.url_overriden_by_dest || raw.thumbnail || null,
+      title: raw.title || "Some post",
+      upvotes: raw.ups ? this.formatUpvotes(raw.ups) : "?",
+    };
+  }
+
+  private formatUpvotes(upvotes: number): string {
+    return upvotes.toString() + "k";
   }
 }
 

@@ -17,9 +17,11 @@
     "ts-jest": "^26.4.3"
   },
   "dependencies": {
+    "@types/p-map": "^2.0.0",
     "config": "^3.3.2",
     "lodash": "^4.17.20",
     "luxon": "^1.25.0",
+    "p-map": "^4.0.0",
     "reddit": "^1.2.0",
     "ts-essentials": "^7.0.1",
     "ts-node": "^9.0.0",

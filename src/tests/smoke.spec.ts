@@ -105,64 +105,88 @@ describe("reddit-notifier", () => {
     expect(updatedSub.enabled).toEqual(true);
   });
 
-  fit("can trigger a news email", async () => {
+  it("can trigger a news email", async () => {
     const mockMailer = {
       send: jest.fn(),
     };
     const usersService = getUsersService();
-    const service = getSubscriptionsService(mockMailer, usersService);
-    const user1 = await usersService.getOrCreate(
+    const subscriptionsService = getSubscriptionsService(
+      mockMailer,
+      usersService
+    );
+    const user = await usersService.getOrCreate(
       "malcoriel@gmail.com",
       "Valeriy"
     );
-    const subscription1 = await service.getOrCreate(user1.id);
-    await service.addSubreddit(subscription1.id, "funny");
-    await service.addSubreddit(subscription1.id, "worldnews");
-    await service.triggerEmailForUser(user1.id);
+    await subscriptionsService.getOrCreate(user.id);
+    await subscriptionsService.triggerEmailForUser(user.id);
     expect(mockMailer.send).toBeCalledWith({
       subject: "Reddit Newsletter",
       title: "Reddit Newsletter",
       userName: "Valeriy",
       recipient: "Valeriy <malcoriel@gmail.com>",
-      newPosts: [
-        {
-          name: "funny",
-          link: "https://reddit.com/r/funny/top",
-          posts: [
-            {
-              title: "wow",
-              upvotes: "45k",
-              imageUrl: "https://imgur.com/example.jpg",
-              url: "https://reddit.com/r/funny/wow",
-            },
-            {
-              title: "wow",
-              upvotes: "45k",
-              imageUrl: "https://imgur.com/example.jpg",
-              url: "https://reddit.com/r/funny/wow",
-            },
-          ],
-        },
-        {
-          name: "World News",
-          link: "https://reddit.com/r/worldnews/top",
-          posts: [
-            {
-              title: "wow",
-              upvotes: "45k",
-              imageUrl: "https://imgur.com/example.jpg",
-              url: "https://reddit.com/r/funny/wow",
-            },
-            {
-              title: "wow",
-              upvotes: "45k",
-              imageUrl: "https://imgur.com/example.jpg",
-              url: "https://reddit.com/r/funny/wow",
-            },
-          ],
-        },
-      ],
+      newPosts: [],
     });
+  });
+
+  fit("can format new posts correctly", async () => {
+    const usersService = getUsersService();
+    const service = getSubscriptionsService();
+    const user1 = await usersService.getOrCreate("malcoriel@gmail.com");
+    const subscription1 = await service.getOrCreate(user1.id);
+    await service.addSubreddit(subscription1.id, "funny");
+    await service.addSubreddit(subscription1.id, "worldnews");
+    const posts = await service.getNewPostsForSubscription(subscription1);
+    expect(posts).toEqual([
+      {
+        name: "funny",
+        link: "https://reddit.com/r/funny/top",
+        posts: [
+          {
+            title: expect.stringContaining(""),
+            upvotes: expect.stringContaining("k"),
+            imageUrl: expect.stringContaining("https"),
+            url: expect.stringContaining("https://reddit.com/r/funny"),
+          },
+          {
+            title: expect.stringContaining(""),
+            upvotes: expect.stringContaining("k"),
+            imageUrl: expect.stringContaining("https"),
+            url: expect.stringContaining("https://reddit.com/r/funny"),
+          },
+          {
+            title: expect.stringContaining(""),
+            upvotes: expect.stringContaining("k"),
+            imageUrl: expect.stringContaining("https"),
+            url: expect.stringContaining("https://reddit.com/r/funny"),
+          },
+        ],
+      },
+      {
+        name: "World News",
+        link: "https://reddit.com/r/worldnews/top",
+        posts: [
+          {
+            title: expect.stringContaining(""),
+            upvotes: expect.stringContaining("k"),
+            imageUrl: null,
+            url: expect.stringContaining("https://reddit.com/r/worldnews"),
+          },
+          {
+            title: expect.stringContaining(""),
+            upvotes: expect.stringContaining("k"),
+            imageUrl: null,
+            url: expect.stringContaining("https://reddit.com/r/worldnews"),
+          },
+          {
+            title: expect.stringContaining(""),
+            upvotes: expect.stringContaining("k"),
+            imageUrl: null,
+            url: expect.stringContaining("https://reddit.com/r/worldnews"),
+          },
+        ],
+      },
+    ]);
   });
 
   it("can validate a subreddit exists", async () => {
@@ -180,5 +204,20 @@ describe("reddit-notifier", () => {
     const posts = await service.getTop("funny", 3, RedditTopInterval.AllTime);
     expect(posts.length).toBe(3);
     expect(posts[0].title).toContain("My cab driver tonight was so excited");
+  });
+
+  it("can get all the information from reddit to format a newsletter", async () => {
+    const service = getRedditService();
+    const posts = await service.getRawTopPosts(
+      RedditTopInterval.Last24Hours,
+      "funny",
+      3
+    );
+    // console.log(posts);
+    for (const post of posts) {
+      expect(typeof post.permalink).toEqual("string");
+      // expect(typeof post.thumbnail).toEqual("string");
+      expect(typeof post.ups).toEqual("number");
+    }
   });
 });
