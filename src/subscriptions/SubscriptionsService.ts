@@ -16,7 +16,15 @@ class SubscriptionsService {
     let sub = this.byUserId[forUserId];
     if (!sub) {
       let id = uuid();
-      sub = { id, userId: forUserId, subreddits: [] };
+      sub = {
+        id,
+        userId: forUserId,
+        subreddits: [],
+        notificationMinuteOffsetUTC: this.offsetFromParsed(
+          this.dateTimeFromString("08:00Z")
+        ),
+        enabled: true,
+      };
       this.storage[id] = sub;
       this.reindex();
     }
@@ -59,13 +67,36 @@ class SubscriptionsService {
     subId: string,
     isoTime: string
   ): Promise<Subscription> {
-    const parsed = DateTime.fromISO(isoTime).toUTC();
+    const parsed = this.dateTimeFromString(isoTime);
     if (!parsed.isValid) {
       throw new BadArgumentError(`Time string ${isoTime} is not in ISO format`);
     }
-    const time = parsed.hour * 60 + parsed.minute;
+    const time = this.offsetFromParsed(parsed);
     const existing = await this.getById(subId);
     existing.notificationMinuteOffsetUTC = time;
+    this.storage[existing.id] = existing;
+    this.reindex();
+    return existing;
+  }
+
+  offsetFromParsed(parsed: DateTime) {
+    return this.offsetFromTimeParts(parsed.hour, parsed.minute);
+  }
+
+  dateTimeFromString(isoDateTime: string) {
+    return DateTime.fromISO(isoDateTime).toUTC();
+  }
+
+  offsetFromTimeParts(hours: number, minutes: number) {
+    return hours * 60 + minutes;
+  }
+
+  async setNotificationEnabled(
+    subId: string,
+    value: boolean
+  ): Promise<Subscription> {
+    const existing = await this.getById(subId);
+    existing.enabled = value;
     this.storage[existing.id] = existing;
     this.reindex();
     return existing;

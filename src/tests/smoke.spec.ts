@@ -68,21 +68,29 @@ describe("reddit-notifier", () => {
     ).rejects.toMatchObject({ message: /does not exist/ });
   });
 
-  it("can set the email send time", async () => {
+  fit("can set the email send time", async () => {
     const service = getSubscriptionsService();
     const usersService = getUsersService();
     const user = await usersService.getOrCreate("malcoriel@gmail.com");
     const subscription = await service.getOrCreate(user.id);
+    expect(subscription.notificationMinuteOffsetUTC).toEqual(480);
     await service.setNotificationTime(subscription.id, "19:21:09+01:00");
     const updatedSub = await service.findById(subscription.id);
     expect(updatedSub.notificationMinuteOffsetUTC).toEqual(1101);
   });
 
-  xit("can turn on/off the email for a user", async () => {
+  fit("can turn on/off the email for a user", async () => {
     const service = getSubscriptionsService();
     const usersService = getUsersService();
     const user = await usersService.getOrCreate("malcoriel@gmail.com");
     const subscription = await service.getOrCreate(user.id);
+    expect(subscription.enabled).toEqual(true);
+    await service.setNotificationEnabled(subscription.id, false);
+    let updatedSub = await service.findById(subscription.id);
+    expect(updatedSub.enabled).toEqual(false);
+    await service.setNotificationEnabled(subscription.id, true);
+    updatedSub = await service.findById(subscription.id);
+    expect(updatedSub.enabled).toEqual(true);
   });
 
   xit("can trigger a news email at the specified time", () => {
