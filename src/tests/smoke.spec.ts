@@ -43,7 +43,6 @@ describe("reddit-notifier", () => {
 
   fit("can get last 3 most-voted posts from a subreddit", async () => {
     const posts = await reddit.getTop("funny", 3, RedditTopInterval.AllTime);
-    expect(posts.length).toEqual(3);
     expect(posts[0].title).toContain("My cab driver tonight was so excited");
   });
 });
