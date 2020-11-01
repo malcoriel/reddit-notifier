@@ -14,7 +14,7 @@ const intervalToType = new Map<RedditTopInterval, string>([
 class RedditService implements IRedditService {
   private client: RedditClient;
   constructor() {
-    const redditApp = config.getTyped("redditApp");
+    const redditApp = config.getTyped("root").redditApp;
 
     const userAgent =
       "Reddit-notifier/1.0.0 (https://github.com/malcoriel/reddit-notifier)";

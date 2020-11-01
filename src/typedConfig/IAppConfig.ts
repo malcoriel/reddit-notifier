@@ -1,8 +1,12 @@
-export interface IAppConfig {
-  redditApp: {
-    id: string;
-    secret: string;
-    botUser: string;
-    botPassword: string;
+type IRedditAppConfig = {
+  id: string;
+  secret: string;
+  botUser: string;
+  botPassword: string;
+};
+
+export type IAppConfig = {
+  root: {
+    redditApp: IRedditAppConfig;
   };
-}
+};
