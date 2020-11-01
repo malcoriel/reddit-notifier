@@ -17,8 +17,17 @@ describe("reddit-notifier", () => {
     );
   });
 
-  it("extra: can delete a user", () => {
-    expect(true).toBe(false);
+  fit("extra: can delete a user", async () => {
+    await usersService.getOrCreate("malcoriel@gmail.com");
+    const users = await usersService.getAll();
+    expect(users).toContainEqual(
+      expect.objectContaining({ email: "malcoriel@gmail.com" })
+    );
+    await usersService.deleteByEmail("malcoriel@gmail.com");
+    const newUsers = await usersService.getAll();
+    expect(newUsers).not.toContainEqual(
+      expect.objectContaining({ email: "malcoriel@gmail.com" })
+    );
   });
 
   it("can create/set a list of favorite subreddits for a user", () => {

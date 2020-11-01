@@ -54,6 +54,15 @@ const usersService = {
     usersService.reindex();
     return existing;
   },
+  async deleteByEmail(email: string): Promise<User | undefined> {
+    const existing = byEmail[email];
+    if (!existing) {
+      return undefined;
+    }
+    delete storage[existing.id];
+    usersService.reindex();
+    return existing;
+  },
 };
 
 export { usersService };
