@@ -1,28 +1,8 @@
 import RedditClient from "reddit";
 import { config } from "../typedConfig/typedConfig";
 import _ from "lodash";
-
-const redditApp = config.getTyped("redditApp");
-
-const userAgent =
-  "Reddit-notifier/1.0.0 (https://github.com/malcoriel/reddit-notifier)";
-const client = new RedditClient({
-  username: redditApp.botUser,
-  password: redditApp.botPassword,
-  appId: redditApp.id,
-  appSecret: redditApp.secret,
-  userAgent,
-});
-
-enum RedditTopInterval {
-  Unknown,
-  AllTime,
-  Last24Hours,
-}
-
-type RedditPost = {
-  title: string;
-};
+import { RedditPost } from "./RedditPost";
+import { RedditTopInterval } from "./RedditTopInterval";
 
 // Available: hour, day, week, month, year, all
 const intervalToType = new Map<RedditTopInterval, string>([
@@ -30,13 +10,24 @@ const intervalToType = new Map<RedditTopInterval, string>([
   [RedditTopInterval.Last24Hours, "day"],
 ]);
 
-const redditService = {
+class RedditService {
+  private client: RedditClient;
+  constructor() {
+    const redditApp = config.getTyped("redditApp");
+
+    const userAgent =
+      "Reddit-notifier/1.0.0 (https://github.com/malcoriel/reddit-notifier)";
+    this.client = new RedditClient({
+      username: redditApp.botUser,
+      password: redditApp.botPassword,
+      appId: redditApp.id,
+      appSecret: redditApp.secret,
+      userAgent,
+    });
+  }
   /**
    * Get top posts from a subreddit.
    * @caveats reddit API does not support its 'limit' param properly for this endpoint, so count can only be 0-25
-   * @param subreddit - a subreddit name without /r
-   * @param count - 0-25 slice the amount of returned posts.
-   * @param interval - filter interval, see RedditTopInterval
    */
   async getTop(
     subreddit: string,
@@ -46,7 +37,7 @@ const redditService = {
     const redditType = intervalToType.get(interval);
     // reddit ignores limit param for some reason, but omitting it causes incorrect sorting of posts
     let url = `/r/${subreddit}/top/?t=${redditType}&limit=${count}`;
-    const res = await client.get(url);
+    const res = await this.client.get(url);
 
     let posts = _.get(res, "data.children", []).map((raw: any) =>
       _.get(raw, "data", {})
@@ -55,10 +46,10 @@ const redditService = {
     posts = posts.slice(0, count);
 
     return posts;
-  },
+  }
   async validateSubredditExists(subreddit: string) {
     try {
-      await client.get(
+      await this.client.get(
         `/api/search_reddit_names?query=${subreddit}&exact=true`
       );
       return true;
@@ -68,7 +59,7 @@ const redditService = {
       }
       throw e;
     }
-  },
-};
+  }
+}
 
-export { redditService, RedditTopInterval };
+export { RedditService };

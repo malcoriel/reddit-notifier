@@ -2,32 +2,27 @@ import { v4 as uuid } from "uuid";
 
 import _, { Dictionary } from "lodash";
 import { NonExistentEntityError } from "../errors/NonExistentEntityError";
+import { Subscription } from "./Subscription";
 
-type Subscription = {
-  id: string;
-  userId: string;
-  subreddits: string[];
-};
+class SubscriptionsService {
+  private storage: Record<string, Subscription> = {};
+  private byUserId: Dictionary<Subscription> = {};
 
-const storage: Record<string, Subscription> = {};
-let byUserId: Dictionary<Subscription> = {};
-
-const subscriptionsService = {
   async getOrCreate(forUserId: string): Promise<Subscription> {
-    let sub = byUserId[forUserId];
+    let sub = this.byUserId[forUserId];
     if (!sub) {
       let id = uuid();
       sub = { id, userId: forUserId, subreddits: [] };
-      storage[id] = sub;
-      subscriptionsService.reindex();
+      this.storage[id] = sub;
+      this.reindex();
     }
     return sub;
-  },
+  }
   reindex() {
-    byUserId = _.keyBy(storage, "userId");
-  },
+    this.byUserId = _.keyBy(this.storage, "userId");
+  }
   async addSubreddit(subId: string, subredditName: string) {
-    const existing = storage[subId];
+    const existing = this.storage[subId];
     if (!existing) {
       throw new NonExistentEntityError(
         `Subscription id ${subId} does not exist`
@@ -35,10 +30,10 @@ const subscriptionsService = {
     }
     existing.subreddits.push(subredditName);
     existing.subreddits = _.uniq(existing.subreddits);
-  },
+  }
   async findByUserId(userId: string) {
-    return byUserId[userId];
-  },
-};
+    return this.byUserId[userId];
+  }
+}
 
-export { subscriptionsService };
+export { SubscriptionsService };

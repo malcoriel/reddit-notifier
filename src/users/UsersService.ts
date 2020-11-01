@@ -1,18 +1,15 @@
 import { v4 as uuid } from "uuid";
 import _, { Dictionary } from "lodash";
 import { NonExistentEntityError } from "../errors/NonExistentEntityError";
+import { User } from "./User";
 
-type User = {
-  email: string;
-  id: string;
-};
-const storage: Record<string, User> = {};
-let byEmail: Dictionary<User> = {};
+class UsersService {
+  private storage: Record<string, User> = {};
+  private byEmail: Dictionary<User> = {};
 
-const usersService = {
   reindex() {
-    byEmail = _.keyBy(Object.values(storage), "email");
-  },
+    this.byEmail = _.keyBy(Object.values(this.storage), "email");
+  }
 
   async create(email: string): Promise<User> {
     const id = uuid();
@@ -20,43 +17,43 @@ const usersService = {
       email,
       id,
     };
-    storage[id] = newUser;
-    usersService.reindex();
+    this.storage[id] = newUser;
+    this.reindex();
     return newUser;
-  },
+  }
   async getOrCreate(email: string): Promise<User> {
-    let user = await usersService.findByEmail(email);
+    let user = await this.findByEmail(email);
     if (!user) {
       user = await this.create(email);
     }
     return user;
-  },
+  }
 
   async findByEmail(email: string): Promise<User | undefined> {
-    return byEmail[email];
-  },
+    return this.byEmail[email];
+  }
 
   async getAll() {
-    return Object.values(storage);
-  },
+    return Object.values(this.storage);
+  }
   async updateEmailById(id: string, newEmail: string): Promise<User> {
-    const existing = storage[id];
+    const existing = this.storage[id];
     if (!existing) {
       throw new NonExistentEntityError(`User by id ${id} does not exist`);
     }
     existing.email = newEmail;
-    usersService.reindex();
+    this.reindex();
     return existing;
-  },
+  }
   async deleteByEmail(email: string): Promise<User | undefined> {
-    const existing = byEmail[email];
+    const existing = this.byEmail[email];
     if (!existing) {
       return undefined;
     }
-    delete storage[existing.id];
-    usersService.reindex();
+    delete this.storage[existing.id];
+    this.reindex();
     return existing;
-  },
-};
+  }
+}
 
-export { usersService };
+export { UsersService };
