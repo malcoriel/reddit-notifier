@@ -3,6 +3,7 @@ import { UsersService } from "../users/UsersService";
 import { SubscriptionsService } from "../subscriptions/SubscriptionsService";
 import { RedditTopInterval } from "../reddit/RedditTopInterval";
 import { config } from "../typedConfig/typedConfig";
+import { DateTime } from "luxon";
 
 describe("reddit-notifier", () => {
   const getRedditService = () =>
@@ -68,7 +69,20 @@ describe("reddit-notifier", () => {
     ).rejects.toMatchObject({ message: /does not exist/ });
   });
 
-  it("can set the email send time", () => {});
+  it("can set the email send time", async () => {
+    const service = getSubscriptionsService();
+    const usersService = getUsersService();
+    const user = await usersService.getOrCreate("malcoriel@gmail.com");
+    const subscription = await service.getOrCreate(user.id);
+    await service.setNotificationTime(
+      subscription.id,
+      "2020-11-01T19:00:09+01:00"
+    );
+    const updatedSub = await service.findById(subscription.id);
+    expect(updatedSub.notificationTime?.toISO()).toEqual(
+      "2020-11-01T18:00:09.000Z"
+    );
+  });
 
   xit("can turn on the email for a user", () => {
     expect(true).toBe(false);

@@ -3,6 +3,8 @@ import _, { Dictionary } from "lodash";
 import { NonExistentEntityError } from "../errors/NonExistentEntityError";
 import { Subscription } from "./Subscription";
 import { IRedditService } from "../reddit/IRedditService";
+import { DateTime } from "luxon";
+import { BadArgumentError } from "../errors/BadArgumentError";
 
 class SubscriptionsService {
   private storage: Record<string, Subscription> = {};
@@ -24,12 +26,7 @@ class SubscriptionsService {
     this.byUserId = _.keyBy(this.storage, "userId");
   }
   async addSubreddit(subId: string, subredditName: string) {
-    const existing = this.storage[subId];
-    if (!existing) {
-      throw new NonExistentEntityError(
-        `Subscription id ${subId} does not exist`
-      );
-    }
+    const existing = await this.getById(subId);
     const subredditExists = await this.redditService.validateSubredditExists(
       subredditName
     );
@@ -43,6 +40,34 @@ class SubscriptionsService {
   }
   async findByUserId(userId: string) {
     return this.byUserId[userId];
+  }
+
+  async findById(subId: string) {
+    return this.storage[subId];
+  }
+
+  async getById(subId: string): Promise<Subscription> {
+    const existing = this.findById(subId);
+    if (!existing) {
+      throw new NonExistentEntityError(
+        `Subscription id ${subId} does not exist`
+      );
+    }
+    return existing;
+  }
+  async setNotificationTime(
+    subId: string,
+    isoTime: string
+  ): Promise<Subscription> {
+    const parsed = DateTime.fromISO(isoTime).toUTC();
+    if (!parsed.isValid) {
+      throw new BadArgumentError(`Time string ${isoTime} is not in ISO format`);
+    }
+    const existing = await this.getById(subId);
+    existing.notificationTime = parsed;
+    this.storage[existing.id] = existing;
+    this.reindex();
+    return existing;
   }
 }
 
