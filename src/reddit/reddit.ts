@@ -1,5 +1,5 @@
 import RedditClient from "reddit";
-import { config } from "../util/typedConfig";
+import { config } from "../typedConfig/typedConfig";
 import _ from "lodash";
 
 const redditApp = config.getTyped("redditApp");

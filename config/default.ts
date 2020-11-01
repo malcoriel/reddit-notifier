@@ -1,4 +1,4 @@
-import { IAppConfig } from "../src/util/IAppConfig";
+import { IAppConfig } from "../src/typedConfig/IAppConfig";
 
 const config: IAppConfig = {
   redditApp: {
