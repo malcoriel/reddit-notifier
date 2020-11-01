@@ -2,12 +2,15 @@ import { redditService, RedditTopInterval } from "../reddit/redditService";
 import { usersService } from "../users/usersService";
 
 describe("reddit-notifier", () => {
-  it("can update a user", () => {
-    expect(true).toBe(false);
+  fit("can update a user", async () => {
+    const user = await usersService.getOrCreate("malcoriel@gmail.com");
+    await usersService.updateEmailById(user.id, "malcoriel+test@gmail.com");
+    const updated = await usersService.findByEmail("malcoriel+test@gmail.com");
+    expect(updated).not.toBeUndefined();
   });
 
   fit("can create a user", async () => {
-    await usersService.create("malcoriel@gmail.com");
+    await usersService.getOrCreate("malcoriel@gmail.com");
     const users = usersService.getAll();
     expect(users).toContainEqual(
       expect.objectContaining({ email: "malcoriel@gmail.com" })
