@@ -38,7 +38,7 @@ const reddit = {
    * @param count - 0-25 slice the amount of returned posts.
    * @param interval - filter interval, see RedditTopInterval
    */
-  getTop: async function (
+  async getTop(
     subreddit: string,
     count: number,
     interval: RedditTopInterval
@@ -55,6 +55,19 @@ const reddit = {
     posts = posts.slice(0, count);
 
     return posts;
+  },
+  async validateSubredditExists(subreddit: string) {
+    try {
+      await client.get(
+        `/api/search_reddit_names?query=${subreddit}&exact=true`
+      );
+      return true;
+    } catch (e) {
+      if (e.message.indexOf("Status code: 404") > -1) {
+        return false;
+      }
+      throw e;
+    }
   },
 };
 
