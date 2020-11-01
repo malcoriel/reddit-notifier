@@ -3,6 +3,7 @@ import { config } from "../typedConfig/typedConfig";
 import _ from "lodash";
 import { RedditPost } from "./RedditPost";
 import { RedditTopInterval } from "./RedditTopInterval";
+import { IRedditService } from "./IRedditService";
 
 // Available: hour, day, week, month, year, all
 const intervalToType = new Map<RedditTopInterval, string>([
@@ -10,7 +11,7 @@ const intervalToType = new Map<RedditTopInterval, string>([
   [RedditTopInterval.Last24Hours, "day"],
 ]);
 
-class RedditService {
+class RedditService implements IRedditService {
   private client: RedditClient;
   constructor() {
     const redditApp = config.getTyped("redditApp");
@@ -46,7 +47,7 @@ class RedditService {
 
     return posts;
   }
-  async validateSubredditExists(subreddit: string) {
+  async validateSubredditExists(subreddit: string): Promise<boolean> {
     try {
       await this.client.get(
         `/api/search_reddit_names?query=${subreddit}&exact=true`

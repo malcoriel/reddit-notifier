@@ -36,7 +36,7 @@ describe("reddit-notifier", () => {
   });
 
   it("can create/update a list of favorite subreddits for a user", async () => {
-    const service = new SubscriptionsService();
+    const service = new SubscriptionsService(new RedditService());
     const usersService = new UsersService();
     const user = await usersService.getOrCreate("malcoriel@gmail.com");
     const subscription = await service.getOrCreate(user.id);
@@ -50,14 +50,14 @@ describe("reddit-notifier", () => {
     );
   });
 
-  xit("refuses to add a non-existent subreddit", async () => {
-    const service = new SubscriptionsService();
+  fit("refuses to add a non-existent subreddit", async () => {
+    const service = new SubscriptionsService(new RedditService());
     const usersService = new UsersService();
     const user = await usersService.getOrCreate("malcoriel@gmail.com");
     const subscription = await service.getOrCreate(user.id);
     await expect(
       service.addSubreddit(subscription.id, "non_existent_funny")
-    ).rejects.toEqual("123");
+    ).rejects.toMatchObject({ message: /does not exist/ });
   });
 
   xit("can set the email send time", () => {
