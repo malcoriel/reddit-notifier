@@ -33,25 +33,26 @@ const intervalToType = new Map<RedditTopInterval, string>([
 const reddit = {
   /**
    * Get top posts from a subreddit.
-   * @caveats reddit API does not support its 'limit' param for this endpoint, so max can only be 0-25
+   * @caveats reddit API does not support its 'limit' param properly for this endpoint, so count can only be 0-25
    * @param subreddit - a subreddit name without /r
-   * @param max - 0-25 slice the amount of returned posts.
+   * @param count - 0-25 slice the amount of returned posts.
    * @param interval - filter interval, see RedditTopInterval
    */
   getTop: async function (
     subreddit: string,
-    max: number,
+    count: number,
     interval: RedditTopInterval
   ): Promise<RedditPost[]> {
     const redditType = intervalToType.get(interval);
-    const res = await client.get(`/r/${subreddit}/top/?t=${redditType}`);
+    // reddit ignores limit param for some reason, but omitting it causes incorrect sorting of posts
+    let url = `/r/${subreddit}/top/?t=${redditType}&limit=${count}`;
+    const res = await client.get(url);
 
     let posts = _.get(res, "data.children", []).map((raw: any) =>
       _.get(raw, "data", {})
     ) as RedditPost[];
 
-    // https://www.reddit.com/r/redditdev/comments/bva5lt/why_limit_is_not_working/
-    posts = posts.slice(0, max);
+    posts = posts.slice(0, count);
 
     return posts;
   },
