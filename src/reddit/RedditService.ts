@@ -68,8 +68,13 @@ class RedditService implements IRedditService {
     }
   }
 
-  getSubredditInfo(subreddit: string): SubredditInfo {
-    return { name: "foo", link: "bar" };
+  async getSubredditInfo(subreddit: string): Promise<SubredditInfo> {
+    const res = await this.client.get(`/r/${subreddit}/about`);
+    const data = _.get(res, "data", {});
+    return {
+      name: data.title || "Unknown subreddit",
+      link: `https://reddit.com${data.url}top`,
+    };
   }
 
   private mapRawPost(raw: any): RedditPost {
@@ -82,7 +87,10 @@ class RedditService implements IRedditService {
   }
 
   private formatUpvotes(upvotes: number): string {
-    return upvotes.toString() + "k";
+    if (upvotes > 999) {
+      return Math.floor(upvotes / 1000) + "k";
+    }
+    return upvotes.toString();
   }
 }
 

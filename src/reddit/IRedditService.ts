@@ -11,5 +11,5 @@ export interface IRedditService {
   ): Promise<RedditPost[]>;
   validateSubredditExists(subreddit: string): Promise<boolean>;
 
-  getSubredditInfo(subreddit: string): SubredditInfo;
+  getSubredditInfo(subreddit: string): Promise<SubredditInfo>;
 }
