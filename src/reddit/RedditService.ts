@@ -1,9 +1,9 @@
 import RedditClient from "reddit";
-import { config } from "../typedConfig/typedConfig";
 import _ from "lodash";
 import { RedditPost } from "./RedditPost";
 import { RedditTopInterval } from "./RedditTopInterval";
 import { IRedditService } from "./IRedditService";
+import { IRedditAppConfig } from "../typedConfig/IAppConfig";
 
 // Available: hour, day, week, month, year, all
 const intervalToType = new Map<RedditTopInterval, string>([
@@ -13,16 +13,14 @@ const intervalToType = new Map<RedditTopInterval, string>([
 
 class RedditService implements IRedditService {
   private client: RedditClient;
-  constructor() {
-    const redditApp = config.getTyped("root").redditApp;
-
+  constructor(private redditAppConfig: IRedditAppConfig) {
     const userAgent =
       "Reddit-notifier/1.0.0 (https://github.com/malcoriel/reddit-notifier)";
     this.client = new RedditClient({
-      username: redditApp.botUser,
-      password: redditApp.botPassword,
-      appId: redditApp.id,
-      appSecret: redditApp.secret,
+      username: this.redditAppConfig.botUser,
+      password: this.redditAppConfig.botPassword,
+      appId: this.redditAppConfig.id,
+      appSecret: this.redditAppConfig.secret,
       userAgent,
     });
   }
@@ -54,6 +52,7 @@ class RedditService implements IRedditService {
       );
       return true;
     } catch (e) {
+      // unfortunately, the HTTP error is masked by reddit.js, so there's no .statusCode
       if (e.message.indexOf("Status code: 404") > -1) {
         return false;
       }

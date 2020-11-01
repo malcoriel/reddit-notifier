@@ -2,8 +2,15 @@ import { RedditService } from "../reddit/RedditService";
 import { UsersService } from "../users/UsersService";
 import { SubscriptionsService } from "../subscriptions/SubscriptionsService";
 import { RedditTopInterval } from "../reddit/RedditTopInterval";
+import { config } from "../typedConfig/typedConfig";
+import { IRedditAppConfig } from "../typedConfig/IAppConfig";
 
 describe("reddit-notifier", () => {
+  let redditAppConfig: IRedditAppConfig;
+  beforeAll(() => {
+    redditAppConfig = config.getTyped("root").redditApp;
+  });
+
   it("can update a user", async () => {
     const service = new UsersService();
     const user = await service.getOrCreate("malcoriel@gmail.com");
@@ -36,7 +43,9 @@ describe("reddit-notifier", () => {
   });
 
   it("can create/update a list of favorite subreddits for a user", async () => {
-    const service = new SubscriptionsService(new RedditService());
+    const service = new SubscriptionsService(
+      new RedditService(redditAppConfig)
+    );
     const usersService = new UsersService();
     const user = await usersService.getOrCreate("malcoriel@gmail.com");
     const subscription = await service.getOrCreate(user.id);
@@ -50,8 +59,10 @@ describe("reddit-notifier", () => {
     );
   });
 
-  fit("refuses to add a non-existent subreddit", async () => {
-    const service = new SubscriptionsService(new RedditService());
+  it("refuses to add a non-existent subreddit", async () => {
+    const service = new SubscriptionsService(
+      new RedditService(redditAppConfig)
+    );
     const usersService = new UsersService();
     const user = await usersService.getOrCreate("malcoriel@gmail.com");
     const subscription = await service.getOrCreate(user.id);
@@ -77,7 +88,7 @@ describe("reddit-notifier", () => {
   });
 
   it("can validate a subreddit exists", async () => {
-    const service = new RedditService();
+    const service = new RedditService(redditAppConfig);
     const exists = await service.validateSubredditExists("funny");
     expect(exists).toBe(true);
     const doesNotExist = await service.validateSubredditExists(
@@ -87,7 +98,7 @@ describe("reddit-notifier", () => {
   });
 
   it("can get last 3 most-voted posts from a subreddit", async () => {
-    const service = new RedditService();
+    const service = new RedditService(redditAppConfig);
     const posts = await service.getTop("funny", 3, RedditTopInterval.AllTime);
     expect(posts.length).toBe(3);
     expect(posts[0].title).toContain("My cab driver tonight was so excited");

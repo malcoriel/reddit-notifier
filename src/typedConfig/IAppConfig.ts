@@ -1,4 +1,4 @@
-type IRedditAppConfig = {
+export type IRedditAppConfig = {
   id: string;
   secret: string;
   botUser: string;
