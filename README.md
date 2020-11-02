@@ -6,6 +6,7 @@ This project uses yarn, however npm most likely will work too.
 # Starting
 
 `yarn install`
+
 `yarn start`
 
 # Testing
