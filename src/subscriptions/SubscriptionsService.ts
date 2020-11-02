@@ -88,6 +88,7 @@ class SubscriptionsService implements ISubscriptionsService {
     }
     return existing;
   }
+
   async setNotificationTime(
     subId: string,
     isoTime: string
@@ -99,8 +100,6 @@ class SubscriptionsService implements ISubscriptionsService {
     const time = this.offsetFromParsed(parsed);
     const existing = await this.getById(subId);
     existing.notificationMinuteOffsetUTC = time;
-    this.storage[existing.id] = existing;
-    this.reindex();
     return existing;
   }
 
@@ -122,8 +121,6 @@ class SubscriptionsService implements ISubscriptionsService {
   ): Promise<Subscription> {
     const existing = await this.getById(subId);
     existing.enabled = value;
-    this.storage[existing.id] = existing;
-    this.reindex();
     return existing;
   }
 

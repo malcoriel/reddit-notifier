@@ -43,14 +43,6 @@ subscriptionsRouter
       return {};
     })
   )
-  .get(
-    "/:subscriptionId/status",
-    handle(async (req) => {
-      const { subscriptionId } = req.params;
-      const enabled = await subscriptionsService.getStatus(subscriptionId);
-      return { enabled: enabled };
-    })
-  )
   .put(
     "/:subscriptionId/status",
     handle(async (req) => {
