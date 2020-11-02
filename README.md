@@ -39,3 +39,6 @@ Some style settings are committed to .idea folder, for WebStorm users.
     * The current limit of 30 requests per minute is not respected.
 6. Proper secrets management
     * Credentials for the app are hardcoded for easier testing and startup.
+7. Configuration
+    * Concurrency for various parallel tasks is not configurable and is set to 4
+    * Internal check interval is not configurable and is set to 1 minute

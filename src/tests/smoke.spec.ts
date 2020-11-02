@@ -1,5 +1,51 @@
+import { RedditService } from "../reddit/RedditService";
+
+let jobInstance: MockCronJob | undefined = undefined;
+jest.mock("cron", () => ({
+  CronJob: function (pattern: string, onTick: () => any) {
+    jobInstance = new MockCronJob(pattern, onTick);
+    return jobInstance;
+  },
+}));
+
 import { RedditTopInterval } from "../reddit/RedditTopInterval";
 import * as locator from "../locator/locator";
+import { IScheduler } from "../scheduling/IScheduler";
+import { IRedditService, SubredditInfo } from "../reddit/IRedditService";
+import { RedditPost } from "../reddit/RedditPost";
+
+class MockCronJob {
+  constructor(private pattern: string, private onTick: () => any) {}
+  start() {}
+  forceTick() {
+    this.onTick();
+  }
+  stop() {}
+}
+
+class MockRedditService implements IRedditService {
+  getSubredditInfo(subreddit: string): Promise<SubredditInfo> {
+    return Promise.resolve({ name: "", link: "" });
+  }
+
+  getTop(
+    subreddit: string,
+    count: number,
+    interval: RedditTopInterval
+  ): Promise<RedditPost[]> {
+    return Promise.resolve([]);
+  }
+
+  validateSubredditExists(subreddit: string): Promise<boolean> {
+    return Promise.resolve(true);
+  }
+}
+
+async function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(() => resolve(), ms);
+  });
+}
 
 describe("reddit-notifier", () => {
   it("can update a user", async () => {
@@ -184,22 +230,52 @@ describe("reddit-notifier", () => {
     expect(posts[0].title).toContain("My cab driver tonight was so excited");
   });
 
-  fit("can trigger a scheduled newsletter", async () => {
+  let scheduler: IScheduler;
+  it("can trigger a scheduled newsletter", async () => {
     const usersService = locator.getUsersService();
     const user = await usersService.getOrCreate("malcoriel@gmail.com");
+    let mockedTime = 600;
     const subscriptionsService = locator.getSubscriptionsService({
       users: usersService,
+      reddit: new MockRedditService(),
+      getCurrentMinutes() {
+        return mockedTime;
+      },
     });
     const subscription = await subscriptionsService.getOrCreate(user.id);
-    jest.useFakeTimers();
-    const spy = jest.spyOn(subscriptionsService, "triggerEmailForUser");
     await subscriptionsService.setNotificationTime(subscription.id, "10:00Z");
-    // time resolution is 1 minute, so 61 seconds should guarantee the trigger
-    jest.advanceTimersByTime(61000);
+    await subscriptionsService.addSubreddit(subscription.id, "funny");
+
+    scheduler = locator.getScheduler({
+      subscriptions: subscriptionsService,
+    });
+    scheduler.init();
+    const spy = jest.spyOn(subscriptionsService, "triggerEmailForUser");
+    // @ts-expect-error
+    jobInstance.forceTick();
+    await delay(1);
+    expect(spy).toHaveBeenCalledWith(user.id);
+
+    spy.mockReset();
+    mockedTime = 601;
+    // @ts-expect-error
+    jobInstance.forceTick();
+    await delay(1);
+    expect(spy).not.toHaveBeenCalled();
+
+    spy.mockReset();
+    await subscriptionsService.setNotificationTime(subscription.id, "08:10Z");
+    mockedTime = 490;
+    // @ts-expect-error
+    jobInstance.forceTick();
+    await delay(1);
     expect(spy).toHaveBeenCalledWith(user.id);
   });
 
   afterEach(() => {
     jest.useRealTimers();
+    if (scheduler) {
+      scheduler.stop();
+    }
   });
 });

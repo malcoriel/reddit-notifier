@@ -9,9 +9,7 @@ const app = express();
 
 const apiConfig = config.getTyped("root").api;
 
-locator.getSubscriptionsService({
-  singleton: true,
-});
+locator.getScheduler({ singleton: true });
 
 app.use("/users", usersRouter);
 app.use("/subscriptions", subscriptionsRouter);

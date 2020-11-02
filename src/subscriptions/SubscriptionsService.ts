@@ -11,6 +11,10 @@ import { RedditTopInterval } from "../reddit/RedditTopInterval";
 import { IMailerService } from "../mails/IMailerService";
 import { ISubscriptionsService } from "./ISubscriptionsService";
 
+const defaultGetCurrentMinutes = (): number => {
+  return 0;
+};
+
 class SubscriptionsService implements ISubscriptionsService {
   private storage: Record<string, Subscription> = {};
   private byUserId: Dictionary<Subscription> = {};
@@ -18,7 +22,8 @@ class SubscriptionsService implements ISubscriptionsService {
   constructor(
     private redditService: IRedditService,
     private mailerService: IMailerService,
-    private usersService: IUsersService
+    private usersService: IUsersService,
+    private getCurrentMinutes: () => number = defaultGetCurrentMinutes
   ) {}
 
   async getOrCreate(forUserId: string): Promise<Subscription> {
@@ -167,6 +172,26 @@ class SubscriptionsService implements ISubscriptionsService {
       },
       { concurrency: 4 }
     );
+  }
+
+  async checkSubscriptions(): Promise<void> {
+    const subscriptions = await this.getAll();
+    const toTrigger = [];
+    for (const sub of subscriptions) {
+      let currentMinutes = this.getCurrentMinutes();
+      if (
+        sub.enabled &&
+        currentMinutes === sub.notificationMinuteOffsetUTC &&
+        sub.subreddits.length > 0
+      ) {
+        toTrigger.push(() => this.triggerEmailForUser(sub.userId));
+      }
+    }
+    await pMap(toTrigger, (fn) => fn(), { concurrency: 4 });
+  }
+
+  private async getAll(): Promise<Subscription[]> {
+    return Object.values(this.storage);
   }
 }
 
