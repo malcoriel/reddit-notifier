@@ -183,4 +183,23 @@ describe("reddit-notifier", () => {
     expect(posts.length).toBe(3);
     expect(posts[0].title).toContain("My cab driver tonight was so excited");
   });
+
+  fit("can trigger a scheduled newsletter", async () => {
+    const usersService = locator.getUsersService();
+    const user = await usersService.getOrCreate("malcoriel@gmail.com");
+    const subscriptionsService = locator.getSubscriptionsService({
+      users: usersService,
+    });
+    const subscription = await subscriptionsService.getOrCreate(user.id);
+    jest.useFakeTimers();
+    const spy = jest.spyOn(subscriptionsService, "triggerEmailForUser");
+    await subscriptionsService.setNotificationTime(subscription.id, "10:00Z");
+    // time resolution is 1 minute, so 61 seconds should guarantee the trigger
+    jest.advanceTimersByTime(61000);
+    expect(spy).toHaveBeenCalledWith(user.id);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
 });

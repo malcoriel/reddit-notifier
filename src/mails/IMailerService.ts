@@ -1,3 +1,3 @@
 export interface IMailerService {
-  send(data: any): void;
+  send(data: any): Promise<void>;
 }

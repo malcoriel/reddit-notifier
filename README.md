@@ -22,6 +22,7 @@ Some style settings are committed to .idea folder, for WebStorm users.
 # Intentionally not implemented
 1. Persistence and shared storage
     * All data is stored in memory, and will be lost on stop.
+    * The interfaces are designed with async in mind, so it's enough to just swap the implementation.
     * Cannot launch more than one replica to share data.
     * At the same time, no need to synchronize scheduling between replicas.
 2. Deployment and optimization
