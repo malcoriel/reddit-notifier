@@ -6,5 +6,6 @@ export class NonExistentEntityError extends Error {
     }
   }
 
+  httpCode = 404;
   code = "NON_EXISTENT_ENTITY";
 }

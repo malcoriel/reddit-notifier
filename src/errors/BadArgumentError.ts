@@ -7,5 +7,6 @@ export class BadArgumentError extends Error {
     }
   }
 
+  httpCode = 401;
   code = "BAD_ARGUMENT";
 }

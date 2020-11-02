@@ -10,9 +10,11 @@ export const handle = (fn: (req: Request) => any) => async (
     const result = await fn(req);
     res.json(result);
   } catch (e) {
+    const httpCode = e.httpCode || 500;
+    const code = e.code || "INTERNAL_SERVER_ERROR";
     logger.error(formatError(e, `failed to handle request:`, req.originalUrl));
-    res.writeHead(500, { "Content-Type": "text/plain" });
-    res.write("500 Internal Server Error", "utf8");
+    res.writeHead(httpCode, { "Content-Type": "text/plain" });
+    res.write(`${httpCode} ${code}`, "utf8");
   } finally {
     res.end();
   }

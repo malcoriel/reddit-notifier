@@ -7,6 +7,31 @@ const subscriptionsService = locator.getSubscriptionsService({
   singleton: true,
 });
 const subscriptionsRouter = Router();
+
+const updateEnabledIfNeeded = async (
+  enableRaw: string,
+  subscriptionId: string
+) => {
+  let enable: boolean | undefined;
+  if (enableRaw === "true") {
+    enable = true;
+  } else if (enableRaw === "false") {
+    enable = false;
+  }
+  if (typeof enable === "boolean") {
+    await subscriptionsService.setNotificationEnabled(subscriptionId, enable);
+  }
+};
+
+const updateTimeIfNeeded = async (
+  timeRaw: string | undefined,
+  subscriptionId: string
+) => {
+  if (typeof timeRaw === "string") {
+    await subscriptionsService.setNotificationTime(subscriptionId, timeRaw);
+  }
+};
+
 subscriptionsRouter
   .post(
     "/",
@@ -46,21 +71,13 @@ subscriptionsRouter
   .put(
     "/:subscriptionId",
     handle(async (req) => {
-      const { enable: enableRaw } = req.body;
-      let enable: boolean | undefined;
-      if (enableRaw === "true") {
-        enable = true;
-      } else if (enableRaw === "false") {
-        enable = false;
-      }
       const { subscriptionId } = req.params;
-      if (typeof enable === "boolean") {
-        await subscriptionsService.setNotificationEnabled(
-          subscriptionId,
-          enable
-        );
-      }
-      return { enable };
+
+      const { enable: enableRaw, time: timeRaw } = req.body;
+      await updateEnabledIfNeeded(enableRaw, subscriptionId);
+      await updateTimeIfNeeded(timeRaw, subscriptionId);
+      let subscription = await subscriptionsService.getById(subscriptionId);
+      return { subscription };
     })
   );
 
