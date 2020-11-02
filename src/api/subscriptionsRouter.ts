@@ -44,21 +44,22 @@ subscriptionsRouter
     })
   )
   .put(
-    "/:subscriptionId/status",
+    "/:subscriptionId",
     handle(async (req) => {
       const { enable: enableRaw } = req.body;
-      let enable;
+      let enable: boolean | undefined;
       if (enableRaw === "true") {
         enable = true;
       } else if (enableRaw === "false") {
         enable = false;
-      } else {
-        throw new BadArgumentError(
-          `body.enable must be either 'false' or 'true'`
-        );
       }
       const { subscriptionId } = req.params;
-      await subscriptionsService.setNotificationEnabled(subscriptionId, enable);
+      if (typeof enable === "boolean") {
+        await subscriptionsService.setNotificationEnabled(
+          subscriptionId,
+          enable
+        );
+      }
       return { enable };
     })
   );
