@@ -19,6 +19,10 @@ The project uses prettier with default configuration, without eslint.
 All code is written in TS, though JS can be used.
 Some style settings are committed to .idea folder, for WebStorm users.
 
+# Extra task (slack integration)
+
+Presentation: https://slides.com/malcoriel/reddit-notifier
+
 # Intentionally not implemented
 1. Persistence and shared storage
     * All data is stored in memory, and will be lost on stop.
