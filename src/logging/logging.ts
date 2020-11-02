@@ -31,6 +31,5 @@ export default logger;
 export const formatError = (e: Error, extra?: string, url?: string): string => {
   let urlParam = url ? `[${url}] ` : "";
   let extraParam = extra ? `${extra} ` : "";
-  console.log(e.message);
   return `${urlParam}${extraParam}${e.message} at ${e.stack}`;
 };
