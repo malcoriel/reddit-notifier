@@ -1,7 +1,7 @@
-import { handle } from "../handle";
-import { BadArgumentError } from "../../errors/BadArgumentError";
+import { handle } from "./handle";
+import { BadArgumentError } from "../errors/BadArgumentError";
 import { Router } from "express";
-import * as locator from "../../locator/locator";
+import * as locator from "../locator/locator";
 
 const usersService = locator.getUsersService(true);
 const usersRouter = Router();

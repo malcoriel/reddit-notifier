@@ -6,13 +6,14 @@ import { IUsersService } from "../users/IUsersService";
 import { SubscriptionsService } from "../subscriptions/SubscriptionsService";
 import { UsersService } from "../users/UsersService";
 import { IRedditService } from "../reddit/IRedditService";
+import { ISubscriptionsService } from "../subscriptions/ISubscriptionsService";
 
 let redditService: IRedditService;
 let mailerService: IMailerService;
 let subscriptionService: SubscriptionsService;
 let usersService: IUsersService;
 
-export const getRedditService = (singleton?: boolean) => {
+export const getRedditService = (singleton?: boolean): IRedditService => {
   const makeNew = () => new RedditService(config.getTyped("root").redditApp);
   if (singleton) {
     redditService = redditService || makeNew();
@@ -21,7 +22,7 @@ export const getRedditService = (singleton?: boolean) => {
   return makeNew();
 };
 
-export const getMailerService = (singleton?: boolean) => {
+export const getMailerService = (singleton?: boolean): IMailerService => {
   const makeNew = () => new MailerService();
   if (singleton) {
     mailerService = mailerService || makeNew();
@@ -51,7 +52,7 @@ export const getSubscriptionsService = ({
   users,
   reddit,
   singleton,
-}: GetSubscriptionsServiceParams) => {
+}: GetSubscriptionsServiceParams): ISubscriptionsService => {
   const makeNew = () =>
     new SubscriptionsService(
       reddit || getRedditService(singleton),

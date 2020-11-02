@@ -65,7 +65,7 @@ describe("reddit-notifier", () => {
     const subscription = await service.getOrCreate(user.id);
     expect(subscription.notificationMinuteOffsetUTC).toEqual(480);
     await service.setNotificationTime(subscription.id, "19:21:09+01:00");
-    const updatedSub = await service.findById(subscription.id);
+    const updatedSub = await service.getById(subscription.id);
     expect(updatedSub.notificationMinuteOffsetUTC).toEqual(1101);
   });
 
@@ -76,10 +76,10 @@ describe("reddit-notifier", () => {
     const subscription = await service.getOrCreate(user.id);
     expect(subscription.enabled).toEqual(true);
     await service.setNotificationEnabled(subscription.id, false);
-    let updatedSub = await service.findById(subscription.id);
+    let updatedSub = await service.getById(subscription.id);
     expect(updatedSub.enabled).toEqual(false);
     await service.setNotificationEnabled(subscription.id, true);
-    updatedSub = await service.findById(subscription.id);
+    updatedSub = await service.getById(subscription.id);
     expect(updatedSub.enabled).toEqual(true);
   });
 

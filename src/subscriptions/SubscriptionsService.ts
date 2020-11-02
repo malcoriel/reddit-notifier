@@ -9,8 +9,9 @@ import { IUsersService } from "../users/IUsersService";
 import pMap from "p-map";
 import { RedditTopInterval } from "../reddit/RedditTopInterval";
 import { IMailerService } from "../mails/IMailerService";
+import { ISubscriptionsService } from "./ISubscriptionsService";
 
-class SubscriptionsService {
+class SubscriptionsService implements ISubscriptionsService {
   private storage: Record<string, Subscription> = {};
   private byUserId: Dictionary<Subscription> = {};
 
@@ -23,21 +24,27 @@ class SubscriptionsService {
   async getOrCreate(forUserId: string): Promise<Subscription> {
     let sub = this.byUserId[forUserId];
     if (!sub) {
-      let id = uuid();
-      sub = {
-        id,
-        userId: forUserId,
-        subreddits: [],
-        notificationMinuteOffsetUTC: this.offsetFromParsed(
-          this.dateTimeFromString("08:00Z")
-        ),
-        enabled: true,
-      };
-      this.storage[id] = sub;
-      this.reindex();
+      sub = await this.create(forUserId);
     }
     return sub;
   }
+
+  async create(forUserId: string): Promise<Subscription> {
+    let id = uuid();
+    let sub = {
+      id,
+      userId: forUserId,
+      subreddits: [],
+      notificationMinuteOffsetUTC: this.offsetFromParsed(
+        this.dateTimeFromString("08:00Z")
+      ),
+      enabled: true,
+    };
+    this.storage[id] = sub;
+    this.reindex();
+    return sub;
+  }
+
   reindex() {
     this.byUserId = _.keyBy(this.storage, "userId");
   }
@@ -118,6 +125,11 @@ class SubscriptionsService {
     this.storage[existing.id] = existing;
     this.reindex();
     return existing;
+  }
+
+  async getStatus(subId: string): Promise<boolean> {
+    const existing = await this.getById(subId);
+    return existing.enabled;
   }
 
   async triggerEmailForUser(userId: string): Promise<void> {
