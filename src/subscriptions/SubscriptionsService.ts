@@ -124,11 +124,6 @@ class SubscriptionsService implements ISubscriptionsService {
     return existing;
   }
 
-  async getStatus(subId: string): Promise<boolean> {
-    const existing = await this.getById(subId);
-    return existing.enabled;
-  }
-
   async triggerEmailForUser(userId: string): Promise<void> {
     const sub = await this.getByUserId(userId);
     if (!sub.enabled) {
