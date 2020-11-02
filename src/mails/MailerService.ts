@@ -1,9 +1,8 @@
-export interface IMailerService {
-  send(data: any): void;
-}
+import { IMailerService } from "./IMailerService";
+import logger from "../logging/logging";
 
 export class MailerService implements IMailerService {
   send(data: any): void {
-    console.log("Triggering email send:", data);
+    logger.info("Triggering email send:", data);
   }
 }

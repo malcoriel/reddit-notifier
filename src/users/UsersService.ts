@@ -44,7 +44,7 @@ class UsersService implements IUsersService {
     return this.byEmail[email];
   }
 
-  async getAll() {
+  async getAll(): Promise<User[]> {
     return Object.values(this.storage);
   }
 

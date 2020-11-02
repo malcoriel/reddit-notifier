@@ -5,10 +5,10 @@ import { Subscription } from "./Subscription";
 import { IRedditService } from "../reddit/IRedditService";
 import { DateTime } from "luxon";
 import { BadArgumentError } from "../errors/BadArgumentError";
-import { IMailerService } from "../mails/MailerService";
 import { IUsersService } from "../users/IUsersService";
 import pMap from "p-map";
 import { RedditTopInterval } from "../reddit/RedditTopInterval";
+import { IMailerService } from "../mails/IMailerService";
 
 class SubscriptionsService {
   private storage: Record<string, Subscription> = {};

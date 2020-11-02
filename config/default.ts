@@ -8,6 +8,13 @@ const config: IAppConfig = {
       botUser: "malc-reddit-notifier",
       botPassword: "NHptdM9NBBQ473T",
     },
+    api: {
+      port: 8080,
+    },
+    logging: {
+      level: "debug",
+      enableConsole: true,
+    },
   },
 };
 

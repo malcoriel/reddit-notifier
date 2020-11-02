@@ -5,8 +5,19 @@ export type IRedditAppConfig = {
   botPassword: string;
 };
 
+export type IApiConfig = {
+  port: number;
+};
+
+export type ILoggingConfig = {
+  enableConsole: boolean;
+  level: string;
+};
+
 export type IAppConfig = {
   root: {
+    api: IApiConfig;
     redditApp: IRedditAppConfig;
+    logging: ILoggingConfig;
   };
 };

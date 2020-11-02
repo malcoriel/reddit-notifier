@@ -1,5 +1,11 @@
-export class BadArgumentError implements Error {
-  constructor(public message: string) {}
+export class BadArgumentError extends Error {
+  public stack?: string;
+  constructor(public message: string) {
+    super();
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, BadArgumentError);
+    }
+  }
 
-  name = "BAD_ARGUMENT";
+  code = "BAD_ARGUMENT";
 }

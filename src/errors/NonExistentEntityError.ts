@@ -1,5 +1,10 @@
-export class NonExistentEntityError implements Error {
-  constructor(public message: string) {}
+export class NonExistentEntityError extends Error {
+  constructor(public message: string) {
+    super();
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, NonExistentEntityError);
+    }
+  }
 
-  name = "NON_EXISTENT_ENTITY";
+  code = "NON_EXISTENT_ENTITY";
 }

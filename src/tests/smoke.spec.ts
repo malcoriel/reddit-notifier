@@ -1,31 +1,9 @@
-import { RedditService } from "../reddit/RedditService";
-import { UsersService } from "../users/UsersService";
-import { SubscriptionsService } from "../subscriptions/SubscriptionsService";
 import { RedditTopInterval } from "../reddit/RedditTopInterval";
-import { config } from "../typedConfig/typedConfig";
-import { IMailerService, MailerService } from "../mails/MailerService";
-import { IUsersService } from "../users/IUsersService";
+import * as locator from "../locator/locator";
 
 describe("reddit-notifier", () => {
-  const getRedditService = () =>
-    new RedditService(config.getTyped("root").redditApp);
-
-  const getMailerService = () => new MailerService();
-
-  const getSubscriptionsService = (
-    mailer?: IMailerService,
-    users?: IUsersService
-  ) => {
-    return new SubscriptionsService(
-      getRedditService(),
-      mailer || getMailerService(),
-      users || getUsersService()
-    );
-  };
-  const getUsersService = () => new UsersService();
-
   it("can update a user", async () => {
-    const service = getUsersService();
+    const service = locator.getUsersService();
     const user = await service.getOrCreate("malcoriel@gmail.com");
     await service.updateEmailById(user.id, "malcoriel+test@gmail.com");
     const updated = await service.findByEmail("malcoriel+test@gmail.com");
@@ -33,7 +11,7 @@ describe("reddit-notifier", () => {
   });
 
   it("can create a user", async () => {
-    const service = getUsersService();
+    const service = locator.getUsersService();
     await service.getOrCreate("malcoriel@gmail.com");
     const users = await service.getAll();
     expect(users).toContainEqual(
@@ -42,7 +20,7 @@ describe("reddit-notifier", () => {
   });
 
   it("extra: can delete a user", async () => {
-    const service = getUsersService();
+    const service = locator.getUsersService();
     await service.getOrCreate("malcoriel@gmail.com");
     const users = await service.getAll();
     expect(users).toContainEqual(
@@ -56,8 +34,8 @@ describe("reddit-notifier", () => {
   });
 
   it("can create/update a list of favorite subreddits for a user", async () => {
-    const service = getSubscriptionsService();
-    const usersService = getUsersService();
+    const service = locator.getSubscriptionsService({});
+    const usersService = locator.getUsersService();
     const user = await usersService.getOrCreate("malcoriel@gmail.com");
     const subscription = await service.getOrCreate(user.id);
     await service.addSubreddit(subscription.id, "funny");
@@ -71,8 +49,8 @@ describe("reddit-notifier", () => {
   });
 
   it("refuses to add a non-existent subreddit", async () => {
-    const service = getSubscriptionsService();
-    const usersService = getUsersService();
+    const service = locator.getSubscriptionsService({});
+    const usersService = locator.getUsersService();
     const user = await usersService.getOrCreate("malcoriel@gmail.com");
     const subscription = await service.getOrCreate(user.id);
     await expect(
@@ -81,8 +59,8 @@ describe("reddit-notifier", () => {
   });
 
   it("can set the email send time", async () => {
-    const service = getSubscriptionsService();
-    const usersService = getUsersService();
+    const service = locator.getSubscriptionsService({});
+    const usersService = locator.getUsersService();
     const user = await usersService.getOrCreate("malcoriel@gmail.com");
     const subscription = await service.getOrCreate(user.id);
     expect(subscription.notificationMinuteOffsetUTC).toEqual(480);
@@ -92,8 +70,8 @@ describe("reddit-notifier", () => {
   });
 
   it("can turn on/off the email for a user", async () => {
-    const service = getSubscriptionsService();
-    const usersService = getUsersService();
+    const service = locator.getSubscriptionsService({});
+    const usersService = locator.getUsersService();
     const user = await usersService.getOrCreate("malcoriel@gmail.com");
     const subscription = await service.getOrCreate(user.id);
     expect(subscription.enabled).toEqual(true);
@@ -109,11 +87,11 @@ describe("reddit-notifier", () => {
     const mockMailer = {
       send: jest.fn(),
     };
-    const usersService = getUsersService();
-    const subscriptionsService = getSubscriptionsService(
-      mockMailer,
-      usersService
-    );
+    const usersService = locator.getUsersService();
+    const subscriptionsService = locator.getSubscriptionsService({
+      mailer: mockMailer,
+      users: usersService,
+    });
     const user = await usersService.getOrCreate(
       "malcoriel@gmail.com",
       "Valeriy"
@@ -130,8 +108,8 @@ describe("reddit-notifier", () => {
   });
 
   it("can format new posts correctly", async () => {
-    const usersService = getUsersService();
-    const service = getSubscriptionsService();
+    const usersService = locator.getUsersService();
+    const service = locator.getSubscriptionsService({});
     const user1 = await usersService.getOrCreate("malcoriel@gmail.com");
     const subscription1 = await service.getOrCreate(user1.id);
     await service.addSubreddit(subscription1.id, "funny");
@@ -190,7 +168,7 @@ describe("reddit-notifier", () => {
   });
 
   it("can validate a subreddit exists", async () => {
-    const service = getRedditService();
+    const service = locator.getRedditService();
     const exists = await service.validateSubredditExists("funny");
     expect(exists).toBe(true);
     const doesNotExist = await service.validateSubredditExists(
@@ -200,7 +178,7 @@ describe("reddit-notifier", () => {
   });
 
   it("can get last 3 most-voted posts from a subreddit", async () => {
-    const service = getRedditService();
+    const service = locator.getRedditService();
     const posts = await service.getTop("funny", 3, RedditTopInterval.AllTime);
     expect(posts.length).toBe(3);
     expect(posts[0].title).toContain("My cab driver tonight was so excited");
