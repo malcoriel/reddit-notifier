@@ -17,6 +17,7 @@ This project uses yarn, however npm most likely will work too.
 
 The project uses prettier with default configuration, without eslint. 
 All code is written in TS, though JS can be used.
+Some style settings are committed to .idea folder, for WebStorm users.
 
 # Intentionally not implemented
 1. Persistence and shared storage
@@ -35,3 +36,5 @@ All code is written in TS, though JS can be used.
 5. Resilience against reddit failures or rate limiting
     * There are currently no retries or caching for fetching data.
     * The current limit of 30 requests per minute is not respected.
+6. Proper secrets management
+    * Credentials for the app are hardcoded for easier testing and startup.
