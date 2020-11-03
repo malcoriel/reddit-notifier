@@ -22,6 +22,7 @@
     "ts-jest": "^26.4.3"
   },
   "dependencies": {
+    "body-parser": "^1.19.0",
     "config": "^3.3.2",
     "cron": "^1.8.2",
     "express": "^4.17.1",

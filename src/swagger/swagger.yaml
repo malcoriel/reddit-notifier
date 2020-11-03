@@ -44,7 +44,7 @@ paths:
           description: "User to create"
           required: true
           schema:
-            $ref: "#/definitions/User"
+            $ref: "#/definitions/CreateUser"
       responses:
         default:
           description: "Created user"
@@ -92,6 +92,10 @@ paths:
           schema:
             $ref: "#/definitions/UpdateUser"
       responses:
+        "200":
+          description: "Updated user"
+          schema:
+            $ref: "#/definitions/User"
         "401":
           description: "No email supplied"
         "404":
@@ -109,6 +113,15 @@ definitions:
       email:
         type: "string"
   UpdateUser:
+    type: "object"
+    properties:
+      email:
+        type: "string"
+      firstName:
+        type: "string"
+      lastName:
+        type: "string"
+  CreateUser:
     type: "object"
     properties:
       email:
