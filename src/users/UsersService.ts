@@ -49,7 +49,7 @@ class UsersService implements IUsersService {
   }
 
   async updateEmailById(id: string, newEmail: string): Promise<User> {
-    const existing = this.getById(id);
+    const existing = await this.getById(id);
     existing.email = newEmail;
     this.reindex();
     return existing;
@@ -65,11 +65,21 @@ class UsersService implements IUsersService {
     return existing;
   }
 
-  getById(id: string): User {
+  async getById(id: string): Promise<User> {
     let existing = this.storage[id];
     if (!existing) {
       throw new NonExistentEntityError(`User by id ${id} does not exist`);
     }
+    return existing;
+  }
+
+  async updateNameById(
+    userId: string,
+    firstName?: string,
+    lastName?: string
+  ): Promise<User> {
+    const existing = await this.getById(userId);
+    existing.firstName = firstName;
     return existing;
   }
 }

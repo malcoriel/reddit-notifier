@@ -28,11 +28,14 @@ usersRouter
     "/:userId",
     handle(async (req) => {
       const { userId } = req.params;
-      const { email } = req.body;
-      if (!email) {
-        throw new BadArgumentError(`email is required`);
+      const { email, firstName, lastName } = req.body;
+      if (email) {
+        await usersService.updateEmailById(userId, email);
       }
-      const user = await usersService.updateEmailById(userId, email);
+      if (firstName || lastName) {
+        await usersService.updateNameById(userId, firstName, lastName);
+      }
+      const user = await usersService.getById(userId);
       return { user };
     })
   )
