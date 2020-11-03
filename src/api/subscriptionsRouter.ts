@@ -9,17 +9,14 @@ const subscriptionsService = locator.getSubscriptionsService({
 const subscriptionsRouter = Router();
 
 const updateEnabledIfNeeded = async (
-  enableRaw: string,
+  enableRaw: boolean | undefined,
   subscriptionId: string
 ) => {
-  let enable: boolean | undefined;
-  if (enableRaw === "true") {
-    enable = true;
-  } else if (enableRaw === "false") {
-    enable = false;
-  }
-  if (typeof enable === "boolean") {
-    await subscriptionsService.setNotificationEnabled(subscriptionId, enable);
+  if (typeof enableRaw === "boolean") {
+    await subscriptionsService.setNotificationEnabled(
+      subscriptionId,
+      enableRaw
+    );
   }
 };
 
@@ -83,7 +80,7 @@ subscriptionsRouter
     handle(async (req) => {
       const { subscriptionId } = req.params;
 
-      const { enable: enableRaw, time: timeRaw, subreddits } = req.body;
+      const { enabled: enableRaw, time: timeRaw, subreddits } = req.body;
       await updateEnabledIfNeeded(enableRaw, subscriptionId);
       await updateTimeIfNeeded(timeRaw, subscriptionId);
       await updateSubredditsIfNeeded(subreddits, subscriptionId);

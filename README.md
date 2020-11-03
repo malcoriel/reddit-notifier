@@ -22,6 +22,8 @@ It also uses yarn, however npm most likely will work too.
 1. Make sure the server is running on port 8080.
 1. `yarn test-e2e`.
 1. Check the server console.
+1. (replace with current time + 1 min) `TIME=13:33+01:00 yarn test-e2e`.
+1. Wait until the email triggers.
 
 # Contributing and style
 
