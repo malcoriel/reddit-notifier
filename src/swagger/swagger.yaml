@@ -55,7 +55,6 @@ paths:
       tags:
         - "user"
       summary: "Get user by id"
-      description: ""
       operationId: "getUser"
       produces:
         - "application/json"
@@ -100,6 +99,88 @@ paths:
           description: "No email supplied"
         "404":
           description: "User not found"
+  /subscription:
+    get:
+      tags:
+        - "subscription"
+      summary: "Get all subscriptions data"
+      produces:
+        - "application/json"
+      responses:
+        default:
+          description: "List of subscriptions"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Subscription"
+    post:
+      tags:
+        - "subscription"
+      summary: "Create a subscription for a user"
+      operationId: "createSubscription"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Properties"
+          required: true
+          schema:
+            $ref: "#/definitions/CreateSubscription"
+      responses:
+        default:
+          description: "Created subscription"
+          schema:
+            $ref: "#/definitions/Subscription"
+  /subscription/{subscriptionId}:
+    get:
+      tags:
+        - "subscription"
+      summary: "Get subscription by id"
+      operationId: "getSubscription"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "subscriptionId"
+          in: "path"
+          description: "The id of the subscription"
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: "Found subscription"
+          schema:
+            $ref: "#/definitions/Subscription"
+        "404":
+          description: "Subscription not found"
+    put:
+      tags:
+        - "subscription"
+      summary: "Update subscription's properties"
+      operationId: "updateSubscription"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "subscriptionId"
+          in: "path"
+          description: "The id of the subscription"
+          required: true
+          type: "string"
+        - in: "body"
+          name: "body"
+          description: "Updated subscription object"
+          required: true
+          schema:
+            $ref: "#/definitions/UpdateSubscription"
+      responses:
+        "200":
+          description: "Updated subscription"
+          schema:
+            $ref: "#/definitions/Subscription"
+        "401":
+          description: "Incorrect values of properties"
+        "404":
+          description: "Subscription not found"
 definitions:
   User:
     type: "object"
@@ -130,3 +211,40 @@ definitions:
         type: "string"
       lastName:
         type: "string"
+  CreateSubscription:
+    type: "object"
+    properties:
+      forUserId:
+        type: "string"
+  Subscription:
+    type: "object"
+    properties:
+      enabled:
+        type: "boolean"
+        description: "If true, the newsletter will be sent at the designated time"
+      notificationMinuteOffsetUTC:
+        type: "number"
+        description: "Offset from 00:00Z in minutes, defining the time"
+      userId:
+        type: "string"
+        description: "The corresponding user id"
+      subreddits:
+        type: "array"
+        description: "The list of favorite subreddits"
+        items:
+          type: "string"
+  UpdateSubscription:
+    type: "object"
+    properties:
+      enabled:
+        type: "boolean"
+      time:
+        type: "string"
+        description: "ISO-formatted time, including time zone"
+        example: "10:00+01:00"
+      subreddits:
+        type: "array"
+        description: "The list of favorite subreddits"
+        items:
+          type: "string"
+

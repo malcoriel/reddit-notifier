@@ -32,7 +32,25 @@ const updateTimeIfNeeded = async (
   }
 };
 
+const updateSubredditsIfNeeded = async (
+  subreddits: string[],
+  subscriptionId: string
+) => {
+  if (subreddits && subreddits.length > 0) {
+    for await (const subreddit of subreddits) {
+      await subscriptionsService.addSubreddit(subscriptionId, subreddit);
+    }
+  }
+};
+
 subscriptionsRouter
+  .get(
+    "/",
+    handle(async () => {
+      const subscriptions = await subscriptionsService.getAll();
+      return { subscriptions };
+    })
+  )
   .post(
     "/",
     handle(async (req) => {
@@ -73,9 +91,10 @@ subscriptionsRouter
     handle(async (req) => {
       const { subscriptionId } = req.params;
 
-      const { enable: enableRaw, time: timeRaw } = req.body;
+      const { enable: enableRaw, time: timeRaw, subreddits } = req.body;
       await updateEnabledIfNeeded(enableRaw, subscriptionId);
       await updateTimeIfNeeded(timeRaw, subscriptionId);
+      await updateSubredditsIfNeeded(subreddits, subscriptionId);
       let subscription = await subscriptionsService.getById(subscriptionId);
       return { subscription };
     })

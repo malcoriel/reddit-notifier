@@ -190,7 +190,7 @@ class SubscriptionsService implements ISubscriptionsService {
     await pMap(toTrigger, (fn) => fn(), { concurrency: 4 });
   }
 
-  private async getAll(): Promise<Subscription[]> {
+  async getAll(): Promise<Subscription[]> {
     return Object.values(this.storage);
   }
 }

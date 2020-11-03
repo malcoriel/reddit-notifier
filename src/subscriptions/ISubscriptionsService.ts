@@ -3,6 +3,7 @@ import { DateTime } from "luxon";
 
 export interface ISubscriptionsService {
   getOrCreate(forUserId: string): Promise<Subscription>;
+  getAll(): Promise<Subscription[]>;
   create(forUserId: string): Promise<Subscription>;
   addSubreddit(subId: string, subredditName: string): Promise<void>;
   findByUserId(userId: string): Promise<Subscription | undefined>;
