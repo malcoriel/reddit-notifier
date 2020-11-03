@@ -145,7 +145,7 @@ describe("reddit-notifier", () => {
     await subscriptionsService.getOrCreate(user.id);
     await subscriptionsService.triggerEmailForUser(user.id);
     expect(mockMailer.send).toBeCalledWith({
-      subject: "Reddit Newsletter",
+      subject: "You've got new posts on reddit!",
       title: "Reddit Newsletter",
       userName: "Valeriy",
       recipient: "Valeriy <malcoriel@gmail.com>",
