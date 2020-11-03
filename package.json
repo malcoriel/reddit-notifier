@@ -18,10 +18,12 @@
     "@types/uuid": "^8.3.0",
     "@types/yamljs": "^0.2.31",
     "jest": "^26.6.1",
+    "node-fetch": "^2.6.1",
     "prettier": "^2.1.2",
     "ts-jest": "^26.4.3"
   },
   "dependencies": {
+    "@types/node-fetch": "^2.5.7",
     "body-parser": "^1.19.0",
     "config": "^3.3.2",
     "cron": "^1.8.2",
@@ -40,6 +42,7 @@
   },
   "scripts": {
     "test": "jest",
+    "test-e2e": "jest --testMatch=\"**/*e2e-spec*.ts\"",
     "start": "ts-node src/api/api.ts"
   }
 }

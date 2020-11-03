@@ -66,12 +66,12 @@ class SubscriptionsService implements ISubscriptionsService {
     existing.subreddits.push(subredditName);
     existing.subreddits = _.uniq(existing.subreddits);
   }
-  async findByUserId(userId: string) {
+  async findByUserId(userId: string): Promise<Subscription> {
     return this.byUserId[userId];
   }
 
-  async getByUserId(userId: string) {
-    const existing = this.findByUserId(userId);
+  async getByUserId(userId: string): Promise<Subscription> {
+    const existing = await this.findByUserId(userId);
     if (!existing) {
       throw new NonExistentEntityError(
         `Subscription for user id ${userId} not found`
@@ -80,12 +80,12 @@ class SubscriptionsService implements ISubscriptionsService {
     return existing;
   }
 
-  async findById(subId: string) {
+  async findById(subId: string): Promise<Subscription> {
     return this.storage[subId];
   }
 
   async getById(subId: string): Promise<Subscription> {
-    const existing = this.findById(subId);
+    const existing = await this.findById(subId);
     if (!existing) {
       throw new NonExistentEntityError(
         `Subscription id ${subId} does not exist`
@@ -130,12 +130,16 @@ class SubscriptionsService implements ISubscriptionsService {
   }
 
   async triggerEmailForUser(userId: string): Promise<void> {
-    const sub = await this.getByUserId(userId);
-    if (!sub.enabled) {
+    let subscription = await this.getByUserId(userId);
+    return this.trigger(subscription);
+  }
+
+  private async trigger(subscription: Subscription): Promise<void> {
+    if (!subscription.enabled) {
       return;
     }
-    const user = await this.usersService.getById(userId);
-    const newPosts = await this.getNewPostsForSubscription(sub);
+    const user = await this.usersService.getById(subscription.userId);
+    const newPosts = await this.getNewPostsForSubscription(subscription);
     let firstName = user.firstName || "fellow redditor";
     let lastNameSuffix = user.lastName ? " " + user.lastName : "";
     let fullName = user.firstName
@@ -192,6 +196,11 @@ class SubscriptionsService implements ISubscriptionsService {
 
   async getAll(): Promise<Subscription[]> {
     return Object.values(this.storage);
+  }
+
+  async triggerEmail(subscriptionId: string): Promise<void> {
+    const subscription = await this.getById(subscriptionId);
+    return this.trigger(subscription);
   }
 }
 

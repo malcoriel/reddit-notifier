@@ -3,6 +3,7 @@ import _, { Dictionary } from "lodash";
 import { NonExistentEntityError } from "../errors/NonExistentEntityError";
 import { User } from "./User";
 import { IUsersService } from "./IUsersService";
+import { BadArgumentError } from "../errors/BadArgumentError";
 
 class UsersService implements IUsersService {
   private storage: Record<string, User> = {};
@@ -17,6 +18,7 @@ class UsersService implements IUsersService {
     firstName?: string,
     lastName?: string
   ): Promise<User> {
+    await this.ensureNoEmailDuplicates(email);
     const id = uuid();
     const newUser = {
       email,
@@ -28,6 +30,15 @@ class UsersService implements IUsersService {
     this.reindex();
     return newUser;
   }
+
+  async ensureNoEmailDuplicates(email: string): Promise<void> {
+    if (this.byEmail[email]) {
+      throw new BadArgumentError(
+        `User with ${email} already exists. Pick a different one.`
+      );
+    }
+  }
+
   async getOrCreate(
     email: string,
     firstName?: string,
@@ -49,6 +60,7 @@ class UsersService implements IUsersService {
   }
 
   async updateEmailById(id: string, newEmail: string): Promise<User> {
+    await this.ensureNoEmailDuplicates(newEmail);
     const existing = await this.getById(id);
     existing.email = newEmail;
     this.reindex();

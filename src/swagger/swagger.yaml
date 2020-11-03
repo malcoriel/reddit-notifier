@@ -95,7 +95,7 @@ paths:
           description: "Updated user"
           schema:
             $ref: "#/definitions/User"
-        "401":
+        "400":
           description: "No email supplied"
         "404":
           description: "User not found"
@@ -177,7 +177,7 @@ paths:
           description: "Updated subscription"
           schema:
             $ref: "#/definitions/Subscription"
-        "401":
+        "400":
           description: "Incorrect values of properties"
         "404":
           description: "Subscription not found"

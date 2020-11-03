@@ -58,18 +58,14 @@ subscriptionsRouter
       if (!forUserId) {
         throw new BadArgumentError(`forUserId is required`);
       }
-      const user = await subscriptionsService.create(forUserId);
-      return { user };
+      const subscription = await subscriptionsService.getOrCreate(forUserId);
+      return { subscription };
     })
   )
   .get(
     "/:subscriptionId",
     handle(async (req) => {
       const { subscriptionId } = req.params;
-      const { email } = req.body;
-      if (!email) {
-        throw new BadArgumentError(`email is required`);
-      }
       const subscription = await subscriptionsService.getById(subscriptionId);
       return { subscription };
     })
@@ -78,11 +74,7 @@ subscriptionsRouter
     "/:subscriptionId/trigger",
     handle(async (req) => {
       const { subscriptionId } = req.params;
-      const { email } = req.body;
-      if (!email) {
-        throw new BadArgumentError(`email is required`);
-      }
-      await subscriptionsService.triggerEmailForUser(subscriptionId);
+      await subscriptionsService.triggerEmail(subscriptionId);
       return {};
     })
   )

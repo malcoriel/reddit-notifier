@@ -16,6 +16,7 @@ export interface ISubscriptionsService {
   offsetFromTimeParts(hours: number, minutes: number): number;
   setNotificationEnabled(subId: string, value: boolean): Promise<Subscription>;
   triggerEmailForUser(userId: string): Promise<void>;
+  triggerEmail(subscriptionId: string): Promise<void>;
   getNewPostsForSubscription(sub: Subscription): Promise<any>;
   checkSubscriptions(): Promise<void>;
 }
