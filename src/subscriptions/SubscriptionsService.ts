@@ -148,7 +148,7 @@ class SubscriptionsService implements ISubscriptionsService {
     let recipient = fullName ? `${fullName} <${user.email}>` : user.email;
 
     await this.mailerService.send({
-      subject: "Reddit Newsletter",
+      subject: "You've got new posts on reddit!",
       title: "Reddit Newsletter",
       userName: firstName,
       recipient: recipient,
