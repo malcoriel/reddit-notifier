@@ -1,17 +1,27 @@
 # Env
 
 This project was developed using node v10.16, so no guarantee it'll work on lower versions.
-This project uses yarn, however npm most likely will work too.
+It also uses yarn, however npm most likely will work too.
 
 # Starting
 
-`yarn install`
-
-`yarn start`
+1. `yarn install`.
+1. Make sure that you have nothing running on  port 8080 (change the `config/default.ts` if you want another port).
+1. `yarn start`.
+1. Go to `http://localhost:8080/docs`.
+1. Try testing/external section.
 
 # Testing
 
+## Unit / integration
+
 `yarn test`
+
+## External
+
+1. Make sure the server is running on port 8080.
+1. `yarn test-e2e`.
+1. Check the server console.
 
 # Contributing and style
 
