@@ -1,0 +1,119 @@
+swagger: "2.0"
+info:
+  description: "This is a reddit-notifier service. It can allow you to subscribe to your favorite subreddits top posts. There is no authentication, everything is accessible as-is."
+  version: "1.0.0"
+  title: "Reddit notifier"
+  contact:
+    email: "malcoriel@gmail.com"
+  license:
+    name: "MIT"
+    url: "https://mit-license.org/"
+basePath: "/"
+tags:
+  - name: "subscription"
+    description: "All operations related about subscribing to subreddits"
+  - name: "user"
+    description: "All operations about managing users"
+schemes:
+  - "http"
+paths:
+  /user:
+    get:
+      tags:
+        - "user"
+      summary: "Get all registered users"
+      produces:
+        - "application/json"
+      responses:
+        default:
+          description: "List of users"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/User"
+    post:
+      tags:
+        - "user"
+      summary: "Create user"
+      operationId: "createUser"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "User to create"
+          required: true
+          schema:
+            $ref: "#/definitions/User"
+      responses:
+        default:
+          description: "Created user"
+          schema:
+            $ref: "#/definitions/User"
+  /user/{userId}:
+    get:
+      tags:
+        - "user"
+      summary: "Get user by id"
+      description: ""
+      operationId: "getUser"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "userId"
+          in: "path"
+          description: "The id of the user"
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: "Found user"
+          schema:
+            $ref: "#/definitions/User"
+        "404":
+          description: "User not found"
+    put:
+      tags:
+        - "user"
+      summary: "Update user's properties"
+      operationId: "updateUserEmail"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "userId"
+          in: "path"
+          description: "User id that need to be updated"
+          required: true
+          type: "string"
+        - in: "body"
+          name: "body"
+          description: "Updated user object"
+          required: true
+          schema:
+            $ref: "#/definitions/UpdateUser"
+      responses:
+        "401":
+          description: "No email supplied"
+        "404":
+          description: "User not found"
+definitions:
+  User:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      firstName:
+        type: "string"
+      lastName:
+        type: "string"
+      email:
+        type: "string"
+  UpdateUser:
+    type: "object"
+    properties:
+      email:
+        type: "string"
+      firstName:
+        type: "string"
+      lastName:
+        type: "string"

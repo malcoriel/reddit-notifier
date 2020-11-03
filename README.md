@@ -44,5 +44,5 @@ Presentation: https://slides.com/malcoriel/reddit-notifier
 6. Proper secrets management
     * Credentials for the app are hardcoded for easier testing and startup.
 7. Configuration
-    * Concurrency for various parallel tasks is not configurable and is set to 4
-    * Internal check interval is not configurable and is set to 1 minute
+    * Concurrency for various parallel tasks is not configurable and is set to 4.
+    * Internal check interval is not configurable and is set to 1 minute.
