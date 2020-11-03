@@ -15,8 +15,9 @@ class Scheduler implements IScheduler {
     }
     try {
       this.isExecuting = true;
+      logger.info("checking subscriptions...");
       await this.subscriptionsService.checkSubscriptions();
-      logger.info("Done checking subscriptions by schedule");
+      logger.info("done checking subscriptions by schedule");
     } catch (e) {
       logger.error(`failed to check subscriptions`, e);
     } finally {
@@ -26,7 +27,7 @@ class Scheduler implements IScheduler {
 
   init(): void {
     this.job = new CronJob(
-      "* * * * * 0",
+      "0 * * * * *",
       () => {
         this.executeOnce();
       },
@@ -35,6 +36,7 @@ class Scheduler implements IScheduler {
       "UTC"
     );
     this.job.start();
+    logger.info("cronjob started");
   }
 
   stop(): void {

@@ -59,11 +59,12 @@ describe("e2e tests", () => {
     const sub = subscriptions.find((s: any) => s.userId === userId);
     expect(sub.id).toEqual(subId);
 
+    const time = process.env.TIME || "10:30+01:00";
     await fetchJson(`http://localhost:8080/subscription/${subId}`, {
       method: "PUT",
       body: {
-        enabled: false,
-        time: "10:30+01:00",
+        enabled: true,
+        time,
         subreddits: ["funny", "spiritisland"],
       },
     });

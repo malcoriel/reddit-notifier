@@ -13,7 +13,8 @@ const app = express();
 const apiConfig = config.getTyped("root").api;
 app.use(bodyParser.json());
 
-locator.getScheduler({ singleton: true });
+const scheduler = locator.getScheduler({ singleton: true });
+scheduler.init();
 
 app.use("/user", usersRouter);
 app.use("/subscription", subscriptionsRouter);

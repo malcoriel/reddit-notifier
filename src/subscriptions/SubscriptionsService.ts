@@ -10,9 +10,11 @@ import pMap from "p-map";
 import { RedditTopInterval } from "../reddit/RedditTopInterval";
 import { IMailerService } from "../mails/IMailerService";
 import { ISubscriptionsService } from "./ISubscriptionsService";
+import logger from "../logging/logging";
 
 const defaultGetCurrentMinutes = (): number => {
-  return 0;
+  let dateTime = DateTime.utc();
+  return dateTime.hour * 60 + dateTime.minute;
 };
 
 class SubscriptionsService implements ISubscriptionsService {
@@ -183,6 +185,9 @@ class SubscriptionsService implements ISubscriptionsService {
     const toTrigger = [];
     for (const sub of subscriptions) {
       let currentMinutes = this.getCurrentMinutes();
+      logger.info(
+        `Subscription for user ${sub.userId}: enabled=${sub.enabled}, offset=${sub.notificationMinuteOffsetUTC}, current=${currentMinutes}`
+      );
       if (
         sub.enabled &&
         currentMinutes === sub.notificationMinuteOffsetUTC &&
